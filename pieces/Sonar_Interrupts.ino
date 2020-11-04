@@ -73,7 +73,7 @@ void setup()
     PCICR |= (1 << PCIE2);                                      // Pin Change Interrupt Control Register enabling Port B
     PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) | (1 << PCINT21); // Enable mask on PCINT19 to trigger interupt on state change
 
-    Timer1.initialize(100000);              // 500000 = half a second
+    Timer1.initialize(50000);               // 500000 = half a second
     Timer1.attachInterrupt(triggerSensors); // triggerSensors to run every readingInterval
     sei();
 }

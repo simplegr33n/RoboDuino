@@ -66,13 +66,15 @@ void setup()
     for (;;)
       ; // Don't proceed, loop forever
   }
+
+  drawHeader();
 }
 
 void loop()
 {
   // Update graphs
   drawGraph();
-  delay(1000);
+  delay(500); // works right down to 1... (looks crazy)
 
   // Update pointer
   historyPointer++;
@@ -82,12 +84,12 @@ void loop()
   }
 }
 
-void drawGraph(void)
+void drawHeader(void)
 {
   display.clearDisplay();
 
   // Top bar
-  display.fillRect(0, 16, 128, 64, SSD1306_INVERSE);
+  display.fillRect(0, 16, 128, 48, SSD1306_INVERSE);
   // display.drawRect(0, 0, 128, 16, SSD1306_INVERSE);
 
   // Toby face
@@ -108,10 +110,16 @@ void drawGraph(void)
   // Invert
   display.invertDisplay(true);
 
-  // Graphs..
-  // MIDDLE (40-88)
-  // LEFT (0-32)
-  // RIGHT (96-128)
+  display.display();
+}
+
+void drawGraph(void)
+{
+  // Clear graph area for update
+  display.fillRect(0, 16, 128, 48, SSD1306_WHITE);
+
+  // Graph lines
+  // LEFT (0-32) -- MIDDLE (40-(64)-88) -- RIGHT (96-128)
   drawGraphLines();
 
   display.display();

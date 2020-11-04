@@ -2,9 +2,20 @@
 #include <stdbool.h>
 #include <TimerOne.h>
 
-///////////
-// For OLED
-///////////
+volatile uint8_t portDstate, portDpast, changedBits;
+volatile bool interruptCalled = false;
+
+volatile unsigned long triggerTime;
+
+const int numberOfSensors = 3;
+unsigned long responseDurations[numberOfSensors];
+unsigned long responseStarts[numberOfSensors] = {0, 0, 0};
+int responseCount = 0; // reset to zero and trigger sensors when responseCount = numberOfSensors
+volatile int pingCount = 0;
+
+///////////////////////
+// OLED / ADAFRUIT Jazz
+///////////////////////
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -18,7 +29,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define LOGO_HEIGHT 16
 #define LOGO_WIDTH 16
-static const unsigned char PROGMEM logo_bmp[] =
+static const unsigned char PROGMEM lena_bmp[] =
     {B00000000, B00000000,
      B01110000, B00000110,
      B01101100, B00000111,
@@ -36,27 +47,12 @@ static const unsigned char PROGMEM logo_bmp[] =
      B10110001, B11100110,
      B11011000, B00011100};
 
-// durations arrays for oled graphing
-float D3_durations[10];
-float D4_durations[10];
-float D5_durations[10];
-int durationsPointer = 0;
-
-int dataUpdate = 0;
-
-//////////////
-// For Sensors
-//////////////
-volatile uint8_t portDstate, portDpast, changedBits;
-volatile bool interruptCalled = false;
-
-volatile unsigned long triggerTime;
-
-const int numberOfSensors = 3;
-unsigned long responseDurations[numberOfSensors];
-unsigned long responseStarts[numberOfSensors] = {0, 0, 0};
-int responseCount = 0; // reset to zero and trigger sensors when responseCount = numberOfSensors
-volatile int pingCount = 0;
+// Historical distance readings
+int D3_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int D4_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int D5_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+// Pointer for referencing position in history arrays
+int historyPointer = 0;
 
 ISR(PCINT2_vect)
 {
@@ -112,29 +108,27 @@ void setup()
 {
   Serial.begin(9600);
 
-  /////////////
-  // OLED Stuff
-  /////////////
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  {                                               // Address 0x3D for 128x64
+  // Get display
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+  { // Address 0x3D for 128x64
     Serial.println(F("SSD1306 allocation failed"));
     for (;;)
       ; // Don't proceed, loop forever
   }
 
-  //    drawGraph(); // Draw a small bitmap image
+  // Draw unchanging header on display
+  drawHeader();
 
-  /////////////////////////
-  // Ping Interrupts Setup
-  ////////////////////////
   cli();
   DDRD = 0b00000100;      // set all bits in Port B Data Direction Register to input, except PCINT18 (our trigger)
   setTriggerPinsTo(HIGH); // ensure trigger pins at high before enabling interrupts
   portDstate = PIND;
+
   PCICR |= (1 << PCIE2);                                      // Pin Change Interrupt Control Register enabling Port B
   PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) | (1 << PCINT21); // Enable mask on PCINT19 to trigger interupt on state change
 
-  Timer1.initialize(100000);              // 500000 = half a second
+  Timer1.initialize(30000);               // 500000 = half a second, 30000 perhaps minimum
   Timer1.attachInterrupt(triggerSensors); // triggerSensors to run every readingInterval
   sei();
 }
@@ -192,31 +186,31 @@ void loop()
   if (responseCount == numberOfSensors)
   {
     cli();
-
     responseCount = 0;
     pingCount = 0;
 
-    // Do stuff
-    Serial.print(microsToCM(responseDurations[0])); // left
-    Serial.print("cm|");
-    Serial.print(microsToCM(responseDurations[1])); // center
-    Serial.print("cm|");
-    Serial.print(microsToCM(responseDurations[2])); // right
-    Serial.println("cm");
+    D3_history[historyPointer] = microsToCM(responseDurations[0]);
+    D4_history[historyPointer] = microsToCM(responseDurations[1]);
+    D5_history[historyPointer] = microsToCM(responseDurations[2]);
 
-    D3_durations[durationsPointer] = microsToCM(responseDurations[0]);
-    D4_durations[durationsPointer] = microsToCM(responseDurations[1]);
-    D5_durations[durationsPointer] = microsToCM(responseDurations[2]);
-
+    // Update pointer
+    historyPointer++;
+    if (historyPointer > 7)
+    {
+      historyPointer = 0;
+    }
     sei();
 
-    durationsPointer++;
-    if (durationsPointer > 9)
-    {
-      durationsPointer = 0;
+    // DEBUG
+    //    Serial.print(microsToCM(responseDurations[0])); // left
+    //    Serial.print("cm|");
+    //    Serial.print(microsToCM(responseDurations[1])); // center
+    //    Serial.print("cm|");
+    //    Serial.print(microsToCM(responseDurations[2])); // right
+    //    Serial.println("cm");
 
-      drawGraph();
-    }
+    // Update OLED Graph
+    drawGraph();
   }
 }
 
@@ -225,118 +219,82 @@ float microsToCM(long microseconds)
   return (float)(microseconds / 2) / 29;
 }
 
-/////////////
-// drawGraph
-////////////
-void drawGraph(void)
+/////////////////////////////////
+// OLED Display functions
+////////////////////////////////
+void drawHeader(void)
 {
   display.clearDisplay();
 
   // Top bar
-  display.fillRect(0, 16, 128, 64, SSD1306_INVERSE);
+  display.fillRect(0, 16, 128, 48, SSD1306_INVERSE);
 
-  // Toby face
+  // Draw Toby face bmp
   display.drawBitmap(
       (display.width() - LOGO_WIDTH) / 2,
       0,
-      logo_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
+      lena_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
+
+  // L / R text
+  display.setTextSize(2);              // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE); // Draw white text
+  display.cp437(true);                 // Use full 256 char 'Code Page 437' font
+  display.setCursor(24, 0);            // Start at top-left corner
+  display.write('L');
+  display.setCursor(96, 0); // Start at top-left corner
+  display.write('R');
 
   // Invert
   display.invertDisplay(true);
 
-  // Graphs..
-  // MIDDLE (40-(64)-88)
-  drawCenterLines();
+  display.display();
+}
 
-  // LEFT (0-32)
-  drawLeftLines();
+void drawGraph(void)
+{
+  // Clear graph area for update
+  display.fillRect(0, 16, 128, 48, SSD1306_WHITE);
 
-  // RIGHT (96-128)
-  drawRightLines();
+  // Graph lines
+  drawGraphLines();
 
   display.display();
 }
 
-void drawCenterLines(void)
+void drawGraphLines(void)
 {
-  int currentLine = 16;
-  for (unsigned int a = 0; a < sizeof(D4_durations) / sizeof(D4_durations[0]); a++)
+  int currentLine = 0;
+  for (unsigned int a = 0; a < 8; a++)
   {
-    int nearness;
-    if (D4_durations[a] > 100)
+    // determine actual currentIndex by reference to historyPointer, overflowing on 8
+    int currentIndex = historyPointer + a;
+    if (currentIndex >= 8)
     {
-      nearness = 0;
-    }
-    else if (D4_durations[a] > 60)
-    {
-      nearness = 0.25;
-    }
-    else if (D4_durations[a] > 30)
-    {
-      nearness = 0.5;
-    }
-    else
-    {
-      nearness = 1;
+      currentIndex = 0 + (currentIndex - 8);
     }
 
-    display.drawLine(65 - (24 * nearness), currentLine, 64 + (24 * nearness), currentLine, SSD1306_BLACK);
-    currentLine++;
-  }
-}
-
-void drawLeftLines(void)
-{
-  int currentLine = 16;
-  for (unsigned int a = 0; a < sizeof(D3_durations) / sizeof(D3_durations[0]); a++)
-  {
-    int nearness;
-    if (D3_durations[a] > 100)
+    // Get left/right/center width ratios
+    float leftWidth = (float)D3_history[currentIndex] / 50;
+    if (leftWidth > 1)
     {
-      nearness = 0;
+      leftWidth = 1;
     }
-    else if (D3_durations[a] > 60)
+    float centerWidth = (float)D4_history[currentIndex] / 50;
+    if (centerWidth > 1)
     {
-      nearness = 0.25;
+      centerWidth = 1;
     }
-    else if (D3_durations[a] > 30)
+    float rightWidth = (float)D5_history[currentIndex] / 50;
+    if (rightWidth > 1)
     {
-      nearness = 0.5;
-    }
-    else
-    {
-      nearness = 1;
+      rightWidth = 1;
     }
 
-    display.drawLine(0, currentLine, (32 * nearness), currentLine, SSD1306_BLACK);
-    currentLine++;
-  }
-}
+    // draw L/C/R lines (with rects for thickness)
+    display.fillRect(0, 16 + (currentLine * 6), (34 - (34 * leftWidth)), 6, SSD1306_BLACK);                                      // LEFT (0-34)
+    display.fillRect((64 - (28 - (28 * centerWidth))), 16 + (currentLine * 6), (28 - (28 * centerWidth)) * 2, 6, SSD1306_BLACK); // CENTER (36-(64)-92)
+    display.fillRect(128 - (34 - (34 * rightWidth)), 16 + (currentLine * 6), (34 - (34 * rightWidth)), 6, SSD1306_BLACK);        // RIGHT (94-128)
 
-void drawRightLines(void)
-{
-  int currentLine = 16;
-  for (unsigned int a = 0; a < sizeof(D3_durations) / sizeof(D3_durations[0]); a++)
-  {
-    int nearness;
-    if (D3_durations[a] > 100)
-    {
-      nearness = 0;
-    }
-    else if (D3_durations[a] > 60)
-    {
-      nearness = 0.25;
-    }
-    else if (D3_durations[a] > 30)
-    {
-      nearness = 0.5;
-    }
-    else
-    {
-      nearness = 1;
-    }
-
-    display.drawLine(128 - (32 * nearness), currentLine, 127, currentLine, SSD1306_BLACK);
     currentLine++;
   }
 }
