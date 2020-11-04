@@ -1,29 +1,14 @@
-/**************************************************************************
- This is an example for our Monochrome OLEDs based on SSD1306 drivers
+#include <stdint.h>
+#include <stdbool.h>
+#include <TimerOne.h>
 
- Pick one up today in the adafruit shop!
- ------> http://www.adafruit.com/category/63_98
-
- This example is for a 128x64 pixel display using I2C to communicate
- 3 pins are required to interface (two I2C and one reset).
-
- Adafruit invests time and resources providing this open
- source code, please support Adafruit and open-source
- hardware by purchasing products from Adafruit!
-
- Written by Limor Fried/Ladyada for Adafruit Industries,
- with contributions from the open source community.
- BSD license, check license.txt for more information
- All text above, and the splash screen below must be
- included in any redistribution.
- **************************************************************************/
-
+///////////
+// For OLED
+///////////
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-////////////////
-// Adafruit jazz
-////////////////
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
@@ -50,120 +35,308 @@ static const unsigned char PROGMEM logo_bmp[] =
      B10100100, B00010010,
      B10110001, B11100110,
      B11011000, B00011100};
-//////////////////
-// For Ping Sensor
-//////////////////
-const int trigPin = 9;
-const int echoPin = 10;
+
+// durations arrays for oled graphing
+float D3_durations[10];
+float D4_durations[10];
+float D5_durations[10];
+int durationsPointer = 0;
+
+int dataUpdate = 0;
+
+//////////////
+// For Sensors
+//////////////
+volatile uint8_t portDstate, portDpast, changedBits;
+volatile bool interruptCalled = false;
+
+volatile unsigned long triggerTime;
+
+const int numberOfSensors = 3;
+unsigned long responseDurations[numberOfSensors];
+unsigned long responseStarts[numberOfSensors] = {0, 0, 0};
+int responseCount = 0; // reset to zero and trigger sensors when responseCount = numberOfSensors
+volatile int pingCount = 0;
+
+ISR(PCINT2_vect)
+{
+  portDpast = portDstate;
+  portDstate = PIND; // get state of Port D with PIND
+  changedBits = portDpast ^ portDstate;
+  interruptCalled = true;
+}
+
+void setTriggerPinsTo(uint8_t signalState)
+{
+  switch (signalState)
+  {
+  case LOW:
+    PORTD &= ~(1UL << 2); // Set trigger pin D3 LOW
+    break;
+  case HIGH:
+    // Port D handles D0 to D7
+    PORTD |= 1UL << 2; // Set trigger pin D3 HIGH
+    break;
+  default:
+    break;
+  }
+}
+
+void triggerSensors(void)
+{
+  if ((responseCount == numberOfSensors))
+  {
+    // Do not trigger, previous responses not yet dealt with
+    return;
+  }
+  else
+  {
+    if ((responseCount == pingCount))
+    {
+      // only advance pingCount if responseCount is caught up
+      pingCount++;
+    }
+  }
+
+  // reset response starts (todo: loop)
+  responseStarts[0] = 0;
+  responseStarts[1] = 0;
+  responseStarts[2] = 0;
+
+  setTriggerPinsTo(LOW); // Set the trigger pins to LOW -- this falling edge triggers the sensor
+  delayMicroseconds(10);
+  setTriggerPinsTo(HIGH); // Then reset and leave HIGH -- ready for next trigger
+}
 
 void setup()
 {
-  // Set trig and return pins
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-
   Serial.begin(9600);
 
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
-  { // Address 0x3D for 128x64
+  /////////////
+  // OLED Stuff
+  /////////////
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  {                                               // Address 0x3D for 128x64
     Serial.println(F("SSD1306 allocation failed"));
     for (;;)
       ; // Don't proceed, loop forever
   }
 
-  testdrawbitmap(); // Draw a small bitmap image
+  //    drawGraph(); // Draw a small bitmap image
 
-  delay(100);
+  /////////////////////////
+  // Ping Interrupts Setup
+  ////////////////////////
+  cli();
+  DDRD = 0b00000100;      // set all bits in Port B Data Direction Register to input, except PCINT18 (our trigger)
+  setTriggerPinsTo(HIGH); // ensure trigger pins at high before enabling interrupts
+  portDstate = PIND;
+  PCICR |= (1 << PCIE2);                                      // Pin Change Interrupt Control Register enabling Port B
+  PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) | (1 << PCINT21); // Enable mask on PCINT19 to trigger interupt on state change
+
+  Timer1.initialize(100000);              // 500000 = half a second
+  Timer1.attachInterrupt(triggerSensors); // triggerSensors to run every readingInterval
+  sei();
 }
 
 void loop()
 {
-  // Update graphs
-  getDistance();
+
+  if (interruptCalled)
+  {
+    interruptCalled = false;
+
+    if (responseCount != numberOfSensors)
+    {
+
+      // Get durations for each sensor response (one sensor per ping for now)
+      if ((pingCount == 1) && (changedBits & 0b00001000))
+      {
+        if (responseStarts[0] != 0)
+        {
+          responseDurations[0] = (micros() - responseStarts[0]);
+          responseCount++;
+        }
+        else
+        {
+          responseStarts[0] = micros();
+        }
+      }
+      if ((pingCount == 2) && (changedBits & 0b00010000))
+      {
+        if (responseStarts[1] != 0)
+        {
+          responseDurations[1] = (micros() - responseStarts[1]);
+          responseCount++;
+        }
+        else
+        {
+          responseStarts[1] = micros();
+        }
+      }
+      if ((pingCount == 3) && (changedBits & 0b00100000))
+      {
+        if (responseStarts[2] != 0)
+        {
+          responseDurations[2] = (micros() - responseStarts[2]);
+          responseCount++;
+        }
+        else
+        {
+          responseStarts[2] = micros();
+        }
+      }
+    }
+  }
+
+  if (responseCount == numberOfSensors)
+  {
+    cli();
+
+    responseCount = 0;
+    pingCount = 0;
+
+    // Do stuff
+    Serial.print(microsToCM(responseDurations[0])); // left
+    Serial.print("cm|");
+    Serial.print(microsToCM(responseDurations[1])); // center
+    Serial.print("cm|");
+    Serial.print(microsToCM(responseDurations[2])); // right
+    Serial.println("cm");
+
+    D3_durations[durationsPointer] = microsToCM(responseDurations[0]);
+    D4_durations[durationsPointer] = microsToCM(responseDurations[1]);
+    D5_durations[durationsPointer] = microsToCM(responseDurations[2]);
+
+    sei();
+
+    durationsPointer++;
+    if (durationsPointer > 9)
+    {
+      durationsPointer = 0;
+
+      drawGraph();
+    }
+  }
 }
 
-void testdrawbitmap(void)
+float microsToCM(long microseconds)
+{
+  return (float)(microseconds / 2) / 29;
+}
+
+/////////////
+// drawGraph
+////////////
+void drawGraph(void)
 {
   display.clearDisplay();
 
   // Top bar
   display.fillRect(0, 16, 128, 64, SSD1306_INVERSE);
-  // display.drawRect(0, 0, 128, 16, SSD1306_INVERSE);
 
   // Toby face
   display.drawBitmap(
       (display.width() - LOGO_WIDTH) / 2,
       0,
       logo_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
-  display.display();
-  delay(1000);
-
-  // L / R text
-  display.setTextSize(2);              // Normal 1:1 pixel scale
-  display.setTextColor(SSD1306_WHITE); // Draw white text
-  display.cp437(true);                 // Use full 256 char 'Code Page 437' font
-  display.setCursor(24, 0);            // Start at top-left corner
-  display.write('L');
-  display.setCursor(96, 0); // Start at top-left corner
-  display.write('R');
 
   // Invert
   display.invertDisplay(true);
 
   // Graphs..
-  // MIDDLE (40-88)
-  display.drawLine(48, 16, 80, 16, SSD1306_BLACK);
-  display.drawLine(60, 17, 68, 17, SSD1306_BLACK);
-  display.drawLine(54, 18, 74, 18, SSD1306_BLACK);
-  display.drawLine(40, 19, 88, 19, SSD1306_BLACK);
-  display.drawLine(60, 20, 68, 20, SSD1306_BLACK);
-  display.drawLine(54, 21, 74, 21, SSD1306_BLACK);
-  display.drawLine(40, 22, 88, 22, SSD1306_BLACK);
+  // MIDDLE (40-(64)-88)
+  drawCenterLines();
 
   // LEFT (0-32)
-  display.drawLine(0, 16, 32, 16, SSD1306_BLACK);
-  display.drawLine(0, 17, 31, 17, SSD1306_BLACK);
-  display.drawLine(0, 18, 16, 18, SSD1306_BLACK);
-  display.drawLine(0, 19, 6, 19, SSD1306_BLACK);
-  display.drawLine(0, 20, 9, 20, SSD1306_BLACK);
-  display.drawLine(0, 21, 32, 21, SSD1306_BLACK);
-  display.drawLine(0, 22, 32, 22, SSD1306_BLACK);
+  drawLeftLines();
 
   // RIGHT (96-128)
-  display.drawLine(114, 16, 128, 16, SSD1306_BLACK);
-  display.drawLine(116, 17, 128, 17, SSD1306_BLACK);
-  display.drawLine(99, 18, 128, 18, SSD1306_BLACK);
-  display.drawLine(105, 19, 128, 19, SSD1306_BLACK);
-  display.drawLine(96, 20, 128, 20, SSD1306_BLACK);
-  display.drawLine(113, 21, 128, 21, SSD1306_BLACK);
-  display.drawLine(0, 22, 32, 22, SSD1306_BLACK);
+  drawRightLines();
 
   display.display();
-  delay(1000);
 }
 
-void getDistance()
+void drawCenterLines(void)
 {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
+  int currentLine = 16;
+  for (unsigned int a = 0; a < sizeof(D4_durations) / sizeof(D4_durations[0]); a++)
+  {
+    int nearness;
+    if (D4_durations[a] > 100)
+    {
+      nearness = 0;
+    }
+    else if (D4_durations[a] > 60)
+    {
+      nearness = 0.25;
+    }
+    else if (D4_durations[a] > 30)
+    {
+      nearness = 0.5;
+    }
+    else
+    {
+      nearness = 1;
+    }
 
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
+    display.drawLine(65 - (24 * nearness), currentLine, 64 + (24 * nearness), currentLine, SSD1306_BLACK);
+    currentLine++;
+  }
+}
 
-  float duration = pulseIn(echoPin, HIGH);
-  float distance = duration * 0.035 / 2;
+void drawLeftLines(void)
+{
+  int currentLine = 16;
+  for (unsigned int a = 0; a < sizeof(D3_durations) / sizeof(D3_durations[0]); a++)
+  {
+    int nearness;
+    if (D3_durations[a] > 100)
+    {
+      nearness = 0;
+    }
+    else if (D3_durations[a] > 60)
+    {
+      nearness = 0.25;
+    }
+    else if (D3_durations[a] > 30)
+    {
+      nearness = 0.5;
+    }
+    else
+    {
+      nearness = 1;
+    }
 
-  Serial.println(distance);
+    display.drawLine(0, currentLine, (32 * nearness), currentLine, SSD1306_BLACK);
+    currentLine++;
+  }
+}
 
-  // L / R text
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE); // Draw white text
-  display.setCursor(4, 0);             // Start at top-left corner
-  display.write("distance");
-  display.setCursor(24, 17); // Start at top-left corner
-  display.print(distance);
-  display.display();
-  delay(200);
+void drawRightLines(void)
+{
+  int currentLine = 16;
+  for (unsigned int a = 0; a < sizeof(D3_durations) / sizeof(D3_durations[0]); a++)
+  {
+    int nearness;
+    if (D3_durations[a] > 100)
+    {
+      nearness = 0;
+    }
+    else if (D3_durations[a] > 60)
+    {
+      nearness = 0.25;
+    }
+    else if (D3_durations[a] > 30)
+    {
+      nearness = 0.5;
+    }
+    else
+    {
+      nearness = 1;
+    }
+
+    display.drawLine(128 - (32 * nearness), currentLine, 127, currentLine, SSD1306_BLACK);
+    currentLine++;
+  }
 }

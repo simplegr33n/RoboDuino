@@ -7,10 +7,11 @@ volatile bool interruptCalled = false;
 
 volatile unsigned long triggerTime;
 
-bool D3_isReading, D4_isReading, D5_isReading;
-volatile int responseDuration[3];
 const int numberOfSensors = 3;
+unsigned long responseDurations[numberOfSensors];
+unsigned long responseStarts[numberOfSensors] = {0, 0, 0};
 int responseCount = 0; // reset to zero and trigger sensors when responseCount = numberOfSensors
+volatile int pingCount = 0;
 
 ISR(PCINT2_vect)
 {
@@ -38,16 +39,28 @@ void setTriggerPinsTo(uint8_t signalState)
 
 void triggerSensors(void)
 {
-    if (responseCount == numberOfSensors)
+    if ((responseCount == numberOfSensors))
     {
-        Serial.println(responseCount);
+        // Do not trigger, previous responses not yet dealt with
         return;
     }
-    // Set the trigger pins back to LOW -- this falling edge triggers the sensor
-    setTriggerPinsTo(LOW);
-    triggerTime = micros();
+    else
+    {
+        if ((responseCount == pingCount))
+        {
+            // only advance pingCount if responseCount is caught up
+            pingCount++;
+        }
+    }
+
+    // reset response starts (todo: loop)
+    responseStarts[0] = 0;
+    responseStarts[1] = 0;
+    responseStarts[2] = 0;
+
+    setTriggerPinsTo(LOW); // Set the trigger pins to LOW -- this falling edge triggers the sensor
     delayMicroseconds(10);
-    setTriggerPinsTo(HIGH);
+    setTriggerPinsTo(HIGH); // Then reset and leave HIGH -- ready for next trigger
 }
 
 void setup()
@@ -60,73 +73,77 @@ void setup()
     PCICR |= (1 << PCIE2);                                      // Pin Change Interrupt Control Register enabling Port B
     PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) | (1 << PCINT21); // Enable mask on PCINT19 to trigger interupt on state change
 
-    Timer1.initialize(200000);              // 500000 = half a second
+    Timer1.initialize(100000);              // 500000 = half a second
     Timer1.attachInterrupt(triggerSensors); // triggerSensors to run every readingInterval
     sei();
 }
 
 void loop()
 {
+
     if (interruptCalled)
     {
         interruptCalled = false;
 
-        // Get durations for each sensor response (one sensor per ping for now)
-        if ((changedBits & 0b00001000) && (responseCount == 0))
+        if (responseCount != numberOfSensors)
         {
-            if (D3_isReading)
+
+            // Get durations for each sensor response (one sensor per ping for now)
+            if ((pingCount == 1) && (changedBits & 0b00001000))
             {
-                responseDuration[1] = (micros() - triggerTime);
-                responseCount++;
-                D3_isReading = false;
+                if (responseStarts[0] != 0)
+                {
+                    responseDurations[0] = (micros() - responseStarts[0]);
+                    responseCount++;
+                }
+                else
+                {
+                    responseStarts[0] = micros();
+                }
             }
-            else
+            if ((pingCount == 2) && (changedBits & 0b00010000))
             {
-                D3_isReading = true;
+                if (responseStarts[1] != 0)
+                {
+                    responseDurations[1] = (micros() - responseStarts[1]);
+                    responseCount++;
+                }
+                else
+                {
+                    responseStarts[1] = micros();
+                }
             }
-        }
-        if ((changedBits & 0b00010000) && (responseCount == (numberOfSensors - 2)))
-        {
-            if (D4_isReading)
+            if ((pingCount == 3) && (changedBits & 0b00100000))
             {
-                responseDuration[0] = (micros() - triggerTime);
-                responseCount++;
-                D4_isReading = false;
-            }
-            else
-            {
-                D4_isReading = true;
-            }
-        }
-        if ((changedBits & 0b00100000) && (responseCount == (numberOfSensors - 1)))
-        {
-            if (D5_isReading)
-            {
-                responseDuration[2] = (micros() - triggerTime);
-                responseCount++;
-                D5_isReading = false;
-            }
-            else
-            {
-                D5_isReading = true;
+                if (responseStarts[2] != 0)
+                {
+                    responseDurations[2] = (micros() - responseStarts[2]);
+                    responseCount++;
+                }
+                else
+                {
+                    responseStarts[2] = micros();
+                }
             }
         }
     }
 
     if (responseCount == numberOfSensors)
     {
-        // Do stuff
-        Serial.print(microsToCM(responseDuration[0])); // left
-        Serial.print("cm[]");
-        Serial.print(microsToCM(responseDuration[1])); // center
-        Serial.print("cm[]");
-        Serial.print(microsToCM(responseDuration[2])); // right
-        Serial.println("cm[]");
+        cli();
 
         responseCount = 0;
-        responseDuration[0] = 0;
-        responseDuration[1] = 0;
-        responseDuration[2] = 0;
+        pingCount = 0;
+
+        // Do stuff
+        Serial.print(microsToCM(responseDurations[0])); // left
+        Serial.print("cm|");
+        Serial.print(microsToCM(responseDurations[1])); // center
+        Serial.print("cm|");
+        Serial.print(microsToCM(responseDurations[2])); // right
+        Serial.println("cm");
+
+        sei();
     }
 }
 
