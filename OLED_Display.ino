@@ -31,7 +31,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define LOGO_HEIGHT 16
 #define LOGO_WIDTH 16
-static const unsigned char PROGMEM logo_bmp[] =
+static const unsigned char PROGMEM lena_bmp[] =
     {B00000000, B00000000,
      B01110000, B00000110,
      B01101100, B00000111,
@@ -49,6 +49,12 @@ static const unsigned char PROGMEM logo_bmp[] =
      B10110001, B11100110,
      B11011000, B00011100};
 
+int D3_history[8] = {0, 10, 33, 80, 4, 66, 63, 41};
+int D4_history[8] = {0, 20, 30, 40, 50, 60, 80, 100};
+int D5_history[8] = {15, 2, 150, 4, 25, 5, 73, 33};
+
+int historyPointer = 0;
+
 void setup()
 {
   Serial.begin(9600);
@@ -60,18 +66,23 @@ void setup()
     for (;;)
       ; // Don't proceed, loop forever
   }
-
-  testdrawbitmap(); // Draw a small bitmap image
-
-  delay(1000);
 }
 
 void loop()
 {
   // Update graphs
+  drawGraph();
+  delay(1000);
+
+  // Update pointer
+  historyPointer++;
+  if (historyPointer > 7)
+  {
+    historyPointer = 0;
+  }
 }
 
-void testdrawbitmap(void)
+void drawGraph(void)
 {
   display.clearDisplay();
 
@@ -83,9 +94,7 @@ void testdrawbitmap(void)
   display.drawBitmap(
       (display.width() - LOGO_WIDTH) / 2,
       0,
-      logo_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
-  display.display();
-  delay(1000);
+      lena_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
 
   // L / R text
   display.setTextSize(2);              // Normal 1:1 pixel scale
@@ -101,32 +110,52 @@ void testdrawbitmap(void)
 
   // Graphs..
   // MIDDLE (40-88)
-  display.drawLine(48, 16, 80, 16, SSD1306_BLACK);
-  display.drawLine(60, 17, 68, 17, SSD1306_BLACK);
-  display.drawLine(54, 18, 74, 18, SSD1306_BLACK);
-  display.drawLine(40, 19, 88, 19, SSD1306_BLACK);
-  display.drawLine(60, 20, 68, 20, SSD1306_BLACK);
-  display.drawLine(54, 21, 74, 21, SSD1306_BLACK);
-  display.drawLine(40, 22, 88, 22, SSD1306_BLACK);
-
   // LEFT (0-32)
-  display.drawLine(0, 16, 32, 16, SSD1306_BLACK);
-  display.drawLine(0, 17, 31, 17, SSD1306_BLACK);
-  display.drawLine(0, 18, 16, 18, SSD1306_BLACK);
-  display.drawLine(0, 19, 6, 19, SSD1306_BLACK);
-  display.drawLine(0, 20, 9, 20, SSD1306_BLACK);
-  display.drawLine(0, 21, 32, 21, SSD1306_BLACK);
-  display.drawLine(0, 22, 32, 22, SSD1306_BLACK);
-
   // RIGHT (96-128)
-  display.drawLine(114, 16, 128, 16, SSD1306_BLACK);
-  display.drawLine(116, 17, 128, 17, SSD1306_BLACK);
-  display.drawLine(99, 18, 128, 18, SSD1306_BLACK);
-  display.drawLine(105, 19, 128, 19, SSD1306_BLACK);
-  display.drawLine(96, 20, 128, 20, SSD1306_BLACK);
-  display.drawLine(113, 21, 128, 21, SSD1306_BLACK);
-  display.drawLine(0, 22, 32, 22, SSD1306_BLACK);
+  drawGraphLines();
 
   display.display();
-  delay(1000);
+}
+
+void drawGraphLines(void)
+{
+  int currentLine = 0;
+  for (unsigned int a = 0; a < 8; a++)
+  {
+    // determine actual currentIndex by reference to historyPointer
+    int currentIndex = historyPointer + a;
+    if (currentIndex >= 8)
+    {
+      currentIndex = 0 + (currentIndex - 8);
+    }
+
+    // Get left/right/center width ratios
+    float leftWidth = (float)D3_history[currentIndex] / 100;
+    if (leftWidth > 1)
+    {
+      leftWidth = 1;
+    }
+    float centerWidth = (float)D4_history[currentIndex] / 100;
+    if (centerWidth > 1)
+    {
+      centerWidth = 1;
+    }
+    float rightWidth = (float)D5_history[currentIndex] / 100;
+    if (rightWidth > 1)
+    {
+      rightWidth = 1;
+    }
+
+    // draw L/C/R lines
+    // display.drawLine(0, 16 + (currentLine * 6), (32 * leftWidth), 16 + (currentLine * 6), SSD1306_BLACK);
+    //display.drawLine((65 - (int)(24 * centerWidth)), 16 + (currentLine * 6), (64 + (int)(24 * centerWidth)), 16 + (currentLine * 6), SSD1306_BLACK);
+    //display.drawLine(128 - (32 * rightWidth), 16 + (currentLine * 6), 127, 16 + (currentLine * 6), SSD1306_BLACK);
+
+    // (optional) draw L/C/R rects instead
+    display.fillRect(0, 16 + (currentLine * 6), (32 * leftWidth), 6, SSD1306_BLACK);
+    display.fillRect((65 - (int)(24 * centerWidth)), 16 + (currentLine * 6), ((int)(48 * centerWidth)), 6, SSD1306_BLACK);
+    display.fillRect(128 - (32 * rightWidth), 16 + (currentLine * 6), (32 * rightWidth), 6, SSD1306_BLACK);
+
+    currentLine++;
+  }
 }
