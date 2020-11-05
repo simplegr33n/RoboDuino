@@ -12,7 +12,7 @@ unsigned long responseDurations[numberOfSensors];
 unsigned long responseStarts[numberOfSensors] = {0, 0, 0};
 int responseCount = 0; // reset to zero and trigger sensors when responseCount = numberOfSensors
 volatile int pingCount = 0;
-#define READING_INTERVAL 40000
+#define READING_INTERVAL 80000 // needs some tuning
 
 ///////////////////////
 // OLED / ADAFRUIT Jazz
@@ -64,7 +64,7 @@ int historyPointer = 0;
 #define IN3 9
 #define IN4 11
 #define ENA 6
-#define carSpeed 200
+#define carSpeed 130
 int middleDistance, leftDistance, rightDistance;
 unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
 
@@ -242,7 +242,7 @@ void loop()
   }
 
   // Drive car code
-  if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 300000))
+  if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 100000))
   {
     lastPilotDecision = micros();
     autoPilot();
@@ -343,11 +343,11 @@ void autoPilot()
   int middleDistance = microsToCM(responseDurations[1]);
   int rightDistance = microsToCM(responseDurations[2]);
 
-  if ((middleDistance < 20) || (leftDistance < 10) || (rightDistance < 10))
+  if ((middleDistance < 40) || (leftDistance < 30) || (rightDistance < 30))
   {
     stop();
 
-    if ((rightDistance < 10) && (leftDistance < 10))
+    if ((rightDistance < 20) && (leftDistance < 20))
     {
       back();
     }
@@ -374,7 +374,7 @@ void forward()
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  Serial.println("Forward");
+  //  Serial.println("Forward");
 }
 
 void back()
@@ -385,7 +385,7 @@ void back()
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
-  Serial.println("Back");
+  //  Serial.println("Back");
 }
 
 void left()
@@ -396,7 +396,7 @@ void left()
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  Serial.println("Left");
+  //  Serial.println("Left");
 }
 
 void right()
@@ -407,12 +407,12 @@ void right()
   digitalWrite(IN2, LOW);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
-  Serial.println("Right");
+  //  Serial.println("Right");
 }
 
 void stop()
 {
   digitalWrite(ENA, LOW);
   digitalWrite(ENB, LOW);
-  Serial.println("Stop!");
+  //  Serial.println("Stop!");
 }

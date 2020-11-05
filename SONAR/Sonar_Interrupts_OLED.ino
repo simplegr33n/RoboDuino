@@ -94,6 +94,11 @@ void triggerSensors(void)
     }
   }
 
+  // reset response starts (todo: loop)
+  responseStarts[0] = 0;
+  responseStarts[1] = 0;
+  responseStarts[2] = 0;
+
   setTriggerPinsTo(LOW); // Set the trigger pins to LOW -- this falling edge triggers the sensor
   delayMicroseconds(10);
   setTriggerPinsTo(HIGH); // Then reset and leave HIGH -- ready for next trigger
@@ -194,11 +199,6 @@ void loop()
     {
       historyPointer = 0;
     }
-
-    // reset response starts (todo: loop)
-    responseStarts[0] = 0;
-    responseStarts[1] = 0;
-    responseStarts[2] = 0;
 
     sei();
 
