@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <TimerOne.h>
 
-volatile uint8_t portDstate, portDpast, changedBits;
+volatile uint8_t portDstate, portDpast, changedBitsD;
 volatile bool interruptCalled = false;
 
 volatile unsigned long triggerTime;
@@ -17,7 +17,7 @@ ISR(PCINT2_vect)
 {
     portDpast = portDstate;
     portDstate = PIND; // get state of Port D with PIND
-    changedBits = portDpast ^ portDstate;
+    changedBitsD = portDpast ^ portDstate;
     interruptCalled = true;
 }
 
@@ -89,7 +89,7 @@ void loop()
         {
 
             // Get durations for each sensor response (one sensor per ping for now)
-            if ((pingCount == 1) && (changedBits & 0b00001000))
+            if ((pingCount == 1) && (changedBitsD & 0b00001000))
             {
                 if (responseStarts[0] != 0)
                 {
@@ -101,7 +101,7 @@ void loop()
                     responseStarts[0] = micros();
                 }
             }
-            if ((pingCount == 2) && (changedBits & 0b00010000))
+            if ((pingCount == 2) && (changedBitsD & 0b00010000))
             {
                 if (responseStarts[1] != 0)
                 {
@@ -113,7 +113,7 @@ void loop()
                     responseStarts[1] = micros();
                 }
             }
-            if ((pingCount == 3) && (changedBits & 0b00100000))
+            if ((pingCount == 3) && (changedBitsD & 0b00100000))
             {
                 if (responseStarts[2] != 0)
                 {
