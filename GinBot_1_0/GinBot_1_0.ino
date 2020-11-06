@@ -64,9 +64,28 @@ int historyPointer = 0;
 #define IN3 9
 #define IN4 11
 #define ENA 6
-#define carSpeed 130
+#define carSpeed 180
+int DRIVE_STATE = 0; // 0 = STOPPED, 1 = FORWARD, -1 = REVERSE, 2 = LEFT, 3 = RIGHT [ cannot switch on Strings in C++]
 int middleDistance, leftDistance, rightDistance;
 unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
+
+///////////////////////
+// For Stuck Detection
+//////////////////////
+#define xPin A1 // x-axis of the accelerometer
+
+bool IS_STUCK = false;
+int unstickAttempts = 0;
+
+int accelerometerSampleCount = 0;
+int accelerometerAffirmCount = 0;
+unsigned long lastAccelerometerSample = 0;
+
+///////////////////////////////
+//
+//  BEGIN FUNCTIONS
+//
+///////////////////////////////
 
 ISR(PCINT2_vect)
 {
@@ -74,48 +93,6 @@ ISR(PCINT2_vect)
   portDstate = PIND; // Get state of Port D with PIND
   changedBits = portDpast ^ portDstate;
   interruptCalled = true;
-}
-
-void setTriggerPinsTo(uint8_t signalState)
-{
-  switch (signalState)
-  {
-  case LOW:
-    // Port B handles D8 to D13
-    PORTB &= ~(1UL << 2); // Set trigger pin D10 LOW
-    break;
-  case HIGH:
-    PORTB |= 1UL << 2; // Set trigger pin D10 HIGH
-    break;
-  default:
-    break;
-  }
-}
-
-void triggerSensors(void)
-{
-  if ((responseCount == numberOfSensors))
-  {
-    // Do not trigger, previous responses not yet dealt with
-    return;
-  }
-  else
-  {
-    if ((responseCount == pingCount))
-    {
-      // only advance pingCount if responseCount is caught up
-      pingCount++;
-    }
-  }
-
-  // reset response starts (todo: loop)
-  responseStarts[0] = 0;
-  responseStarts[1] = 0;
-  responseStarts[2] = 0;
-
-  setTriggerPinsTo(LOW); // Set the trigger pins to LOW -- this falling edge triggers the sensor
-  delayMicroseconds(10);
-  setTriggerPinsTo(HIGH); // Then reset and leave HIGH -- ready for next trigger
 }
 
 void setup()
@@ -241,12 +218,66 @@ void loop()
     drawGraph();
   }
 
+  // Accelerometer code
+  if ((lastAccelerometerSample == 0) || (micros() - lastAccelerometerSample > 10000))
+  {
+    lastAccelerometerSample = micros();
+    sampleAccelerometer();
+
+    if (IS_STUCK)
+    {
+      Serial.println("STUCK!");
+    }
+  }
+
   // Drive car code
-  if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 100000))
+  if ((micros() - lastPilotDecision > 10000))
   {
     lastPilotDecision = micros();
     autoPilot();
   }
+}
+
+void setTriggerPinsTo(uint8_t signalState)
+{
+  switch (signalState)
+  {
+  case LOW:
+    // Port B handles D8 to D13
+    PORTB &= ~(1UL << 2); // Set trigger pin D10 LOW
+    break;
+  case HIGH:
+    PORTB |= 1UL << 2; // Set trigger pin D10 HIGH
+    break;
+  default:
+    break;
+  }
+}
+
+void triggerSensors(void)
+{
+  if ((responseCount == numberOfSensors))
+  {
+    // Do not trigger, previous responses not yet dealt with
+    return;
+  }
+  else
+  {
+    if ((responseCount == pingCount))
+    {
+      // only advance pingCount if responseCount is caught up
+      pingCount++;
+    }
+  }
+
+  // reset response starts (todo: loop)
+  responseStarts[0] = 0;
+  responseStarts[1] = 0;
+  responseStarts[2] = 0;
+
+  setTriggerPinsTo(LOW); // Set the trigger pins to LOW -- this falling edge triggers the sensor
+  delayMicroseconds(10);
+  setTriggerPinsTo(HIGH); // Then reset and leave HIGH -- ready for next trigger
 }
 
 float microsToCM(long microseconds)
@@ -334,36 +365,129 @@ void drawGraphLines(void)
   }
 }
 
+//////////////////////////////////////////
+// Accerometer Functions
+/////////////////////////////////////////
+
+void sampleAccelerometer(void)
+{
+  int x = analogRead(xPin); //read from xpin
+
+  if (((((float)x - 331.5) / 65 * 9.8) > 1) || ((((float)x - 331.5) / 65 * 9.8) < -1))
+  {
+    accelerometerAffirmCount++;
+  }
+
+  accelerometerSampleCount++;
+
+  if (accelerometerSampleCount == 10)
+  {
+    if (accelerometerAffirmCount < 4)
+    {
+      IS_STUCK = true;
+    }
+    else
+    {
+      IS_STUCK = false;
+    }
+
+    accelerometerSampleCount = 0;
+    accelerometerAffirmCount = 0;
+  }
+}
+
 /////////////////////////////////
 // Motor Driving Functions
 ////////////////////////////////
+
+// Determine appropriate DRIVE_STATE
 void autoPilot()
 {
-  int leftDistance = microsToCM(responseDurations[0]);
-  int middleDistance = microsToCM(responseDurations[1]);
-  int rightDistance = microsToCM(responseDurations[2]);
-
-  if ((middleDistance < 40) || (leftDistance < 30) || (rightDistance < 30))
+  if (IS_STUCK == false)
   {
-    stop();
+    int leftDistance = microsToCM(responseDurations[0]);
+    int middleDistance = microsToCM(responseDurations[1]);
+    int rightDistance = microsToCM(responseDurations[2]);
 
-    if ((rightDistance < 20) && (leftDistance < 20))
+    if ((middleDistance < 40) || (leftDistance < 30) || (rightDistance < 30))
     {
+      if ((rightDistance < 20) && (leftDistance < 20))
+      {
+        DRIVE_STATE = -1;
+      }
+      else if (rightDistance > leftDistance)
+      {
+        DRIVE_STATE = 3;
+      }
+      else if (rightDistance < leftDistance)
+      {
+        DRIVE_STATE = 2;
+      }
+    }
+    else
+    {
+      DRIVE_STATE = 1;
+    }
+
+    executeMotorFunction();
+  }
+  else if (IS_STUCK)
+  {
+    attemptUnstick();
+  }
+}
+
+// Signal motors using DRIVE_STATE
+void executeMotorFunction()
+{
+  switch (DRIVE_STATE)
+  {
+  //  0 = STOPPED, 1 = FORWARD, -1 = REVERSE, 2 = LEFT, 3 = RIGHT
+  case 1:
+    forward();
+    break;
+  case -1:
+    reverse();
+    break;
+  case 3:
+    right();
+    break;
+  case 2:
+    left();
+    break;
+  case 0:
+    stop();
+    break;
+  default:
+    stop();
+  }
+}
+
+// Attempt Unsticking
+void attemptUnstick()
+{
+  if (unstickAttempts < 8)
+  {
+    if ((unstickAttempts == 0) || (unstickAttempts % 2 == 0))
+    {
+      stop();
       reverse();
+      delay(200);
+      IS_STUCK = false;
     }
-    else if (rightDistance > leftDistance)
+    else
     {
-      right();
-    }
-    else if (rightDistance < leftDistance)
-    {
-      left();
+      stop();
+      forward();
+      delay(200);
+      IS_STUCK = false;
     }
   }
   else
   {
-    forward();
+    stop();
   }
+  unstickAttempts++;
 }
 
 void forward()
