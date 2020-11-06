@@ -41,14 +41,14 @@ ISR(PCINT2_vect)
 
 void resolveUltrasonicInterrupt()
 {
-
     ultrasonicInterruptCalled = false;
 
     if (ultrasonicResponseCount != ultrasonicSensorQuantity)
     {
-
-        // Get durations for each sensor response (one sensor per ping for now)
-        if ((ultrasonicPingCount == 1) && (portDchangedBits & 0b00000100))
+        // Get durations for each sensor response
+        // --- sequential, one sensor read per ping for now
+        // --- TODO: revisit simultaneous processing of sensors
+        if ((ultrasonicPingCount == 1) && (portDchangedBits & 0b00000100)) // Pin D2
         {
             if (ultrasonicResponseStarts[0] != 0)
             {
@@ -60,7 +60,8 @@ void resolveUltrasonicInterrupt()
                 ultrasonicResponseStarts[0] = micros();
             }
         }
-        if ((ultrasonicPingCount == 2) && (portDchangedBits & 0b00001000))
+
+        if ((ultrasonicPingCount == 2) && (portDchangedBits & 0b00001000)) // Pin D3
         {
             if (ultrasonicResponseStarts[1] != 0)
             {
@@ -71,92 +72,92 @@ void resolveUltrasonicInterrupt()
             {
                 ultrasonicResponseStarts[1] = micros();
             }
-        }
-        if ((ultrasonicPingCount == 3) && (portDchangedBits & 0b00010000))
-        {
-            if (ultrasonicResponseStarts[2] != 0)
+
+            if ((ultrasonicPingCount == 3) && (portDchangedBits & 0b00010000)) // Pin D4
             {
-                ultrasonicResponseDurations[2] = (micros() - ultrasonicResponseStarts[2]);
-                ultrasonicResponseCount++;
-            }
-            else
-            {
-                ultrasonicResponseStarts[2] = micros();
+                if (ultrasonicResponseStarts[2] != 0)
+                {
+                    ultrasonicResponseDurations[2] = (micros() - ultrasonicResponseStarts[2]);
+                    ultrasonicResponseCount++;
+                }
+                else
+                {
+                    ultrasonicResponseStarts[2] = micros();
+                }
             }
         }
     }
-}
 
-void updateUltrasonicHistory()
-{
-    cli();
-    // Refresh Interrupt counts
-    ultrasonicResponseCount = 0;
-    ultrasonicPingCount = 0;
-
-    // Update history entries
-    D2_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[0]);
-    D3_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[1]);
-    D4_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[2]);
-
-    // Update pointer
-    ultrasonicHistoryPointer++;
-    if (ultrasonicHistoryPointer > 7)
+    void updateUltrasonicHistory()
     {
-        ultrasonicHistoryPointer = 0;
-    }
-    sei();
-}
+        cli();
+        // Refresh Interrupt counts
+        ultrasonicResponseCount = 0;
+        ultrasonicPingCount = 0;
 
-/////////////////////////////////
-// Trigger Functions
-////////////////////////////////
-void setTriggerPinsTo(uint8_t signalState)
-{
-    switch (signalState)
-    {
-    case LOW:
-        // Port B handles D8 to D13 - setting bit 2 sets trigger pin D10 HIGH or LOW
-        PORTB &= ~(1UL << 2);
-        break;
-    case HIGH:
-        PORTB |= 1UL << 2;
-        break;
-    default:
-        break;
-    }
-}
+        // Update history entries
+        D2_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[0]);
+        D3_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[1]);
+        D4_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[2]);
 
-void triggerSensors(void)
-{
-    if ((ultrasonicResponseCount == ultrasonicSensorQuantity))
-    {
-        // Do not trigger, previous responses not yet dealt with
-        return;
-    }
-    else
-    {
-        if ((ultrasonicResponseCount == ultrasonicPingCount))
+        // Update pointer
+        ultrasonicHistoryPointer++;
+        if (ultrasonicHistoryPointer > 7)
         {
-            // only advance pingCount if responseCount is caught up
-            ultrasonicPingCount++;
+            ultrasonicHistoryPointer = 0;
+        }
+        sei();
+    }
+
+    /////////////////////////////////
+    // Trigger Functions
+    ////////////////////////////////
+    void setTriggerPinsTo(uint8_t signalState)
+    {
+        switch (signalState)
+        {
+        case LOW:
+            // Port B handles D8 to D13 - setting bit 2 sets trigger pin D10 HIGH or LOW
+            PORTB &= ~(1UL << 2);
+            break;
+        case HIGH:
+            PORTB |= 1UL << 2;
+            break;
+        default:
+            break;
         }
     }
 
-    // reset response starts (todo: loop)
-    ultrasonicResponseStarts[0] = 0;
-    ultrasonicResponseStarts[1] = 0;
-    ultrasonicResponseStarts[2] = 0;
+    void triggerSensors(void)
+    {
+        if ((ultrasonicResponseCount == ultrasonicSensorQuantity))
+        {
+            // Do not trigger, previous responses not yet dealt with
+            return;
+        }
+        else
+        {
+            if ((ultrasonicResponseCount == ultrasonicPingCount))
+            {
+                // only advance pingCount if responseCount is caught up
+                ultrasonicPingCount++;
+            }
+        }
 
-    setTriggerPinsTo(LOW); // Set the trigger pins to LOW, falling edge triggers the sensor
-    delayMicroseconds(10);
-    setTriggerPinsTo(HIGH); // Then reset and leave HIGH, ready for next trigger
-}
+        // reset response starts (todo: loop)
+        ultrasonicResponseStarts[0] = 0;
+        ultrasonicResponseStarts[1] = 0;
+        ultrasonicResponseStarts[2] = 0;
 
-/////////////////////////////////
-// Utility Functions
-////////////////////////////////
-float microsToCentimeters(long microseconds)
-{
-    return (float)microseconds / (29 * 2); // :: (duration [μs]) / (29 [cm/μs] * 2 [return distance])
-}
+        setTriggerPinsTo(LOW); // Set the trigger pins to LOW, falling edge triggers the sensor
+        delayMicroseconds(10);
+        setTriggerPinsTo(HIGH); // Then reset and leave HIGH, ready for next trigger
+    }
+
+    /////////////////////////////////
+    // Utility Functions
+    ////////////////////////////////
+    float microsToCentimeters(long microseconds)
+    {
+        return (float)microseconds / (29 * 2); // :: (duration [μs]) / (29 [cm/μs] * 2 [return distance])
+    }
