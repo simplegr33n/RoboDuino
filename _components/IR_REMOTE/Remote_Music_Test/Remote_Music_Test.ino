@@ -159,7 +159,7 @@ void setup()
     for (;;)
       ; // Don't proceed, loop forever
   }
-  drawHeader();
+  displayHeader();
 }
 
 void loop()
@@ -199,7 +199,7 @@ void loop()
   }
 }
 
-void drawHeader(void)
+void displayHeader(void)
 {
   display.clearDisplay();
 

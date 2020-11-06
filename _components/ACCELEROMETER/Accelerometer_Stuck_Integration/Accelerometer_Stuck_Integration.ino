@@ -108,7 +108,7 @@ void setup()
   }
 
   // Draw unchanging header on display
-  drawHeader();
+  displayHeader();
 
   // Set up Motor Output Pins
   pinMode(IN1, OUTPUT);
@@ -190,9 +190,9 @@ void loop()
     ultrasonicResponseCount = 0;
     ultrasonicPingCount = 0;
 
-    D2_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[0]);
-    D3_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[1]);
-    D4_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[2]);
+    D2_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[0]);
+    D3_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[1]);
+    D4_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[2]);
 
     leftDistance = D2_history[ultrasonicHistoryPointer]; // this sillyness only necessary because of graphing..
     middleDistance = D3_history[ultrasonicHistoryPointer];
@@ -215,7 +215,7 @@ void loop()
     //    Serial.println("cm");
 
     // Update OLED Graph
-    drawGraph();
+    updateUltrasonicGraph();
   }
 
   // Accelerometer code
@@ -280,7 +280,7 @@ void triggerSensors(void)
   setTriggerPinsTo(HIGH); // Then reset and leave HIGH -- ready for next trigger
 }
 
-float microsToCM(long microseconds)
+float microsToCentimeters(long microseconds)
 {
   return (float)(microseconds / 2) / 29;
 }
@@ -288,7 +288,7 @@ float microsToCM(long microseconds)
 /////////////////////////////////
 // OLED Display functions
 ////////////////////////////////
-void drawHeader(void)
+void displayHeader(void)
 {
   display.clearDisplay();
 
@@ -316,18 +316,18 @@ void drawHeader(void)
   display.display();
 }
 
-void drawGraph(void)
+void updateUltrasonicGraph(void)
 {
   // Clear graph area for update
   display.fillRect(0, 16, 128, 48, SSD1306_WHITE);
 
   // Graph lines
-  drawGraphLines();
+  drawUltrasonicGraphLines();
 
   display.display();
 }
 
-void drawGraphLines(void)
+void drawUltrasonicGraphLines(void)
 {
   int currentLine = 0;
   for (unsigned int a = 0; a < 8; a++)
@@ -409,9 +409,9 @@ void autoNavigation()
 {
   if (IS_STUCK == false)
   {
-    int leftDistance = microsToCM(ultrasonicResponseDurations[0]);
-    int middleDistance = microsToCM(ultrasonicResponseDurations[1]);
-    int rightDistance = microsToCM(ultrasonicResponseDurations[2]);
+    int leftDistance = microsToCentimeters(ultrasonicResponseDurations[0]);
+    int middleDistance = microsToCentimeters(ultrasonicResponseDurations[1]);
+    int rightDistance = microsToCentimeters(ultrasonicResponseDurations[2]);
 
     if ((middleDistance < 40) || (leftDistance < 30) || (rightDistance < 30))
     {

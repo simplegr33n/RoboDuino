@@ -136,18 +136,18 @@ void loop()
         ultrasonicPingCount = 0;
 
         // Do stuff
-        Serial.print(microsToCM(ultrasonicResponseDurations[0])); // left
+        Serial.print(microsToCentimeters(ultrasonicResponseDurations[0])); // left
         Serial.print("cm|");
-        Serial.print(microsToCM(ultrasonicResponseDurations[1])); // center
+        Serial.print(microsToCentimeters(ultrasonicResponseDurations[1])); // center
         Serial.print("cm|");
-        Serial.print(microsToCM(ultrasonicResponseDurations[2])); // right
+        Serial.print(microsToCentimeters(ultrasonicResponseDurations[2])); // right
         Serial.println("cm");
 
         sei();
     }
 }
 
-float microsToCM(long microseconds)
+float microsToCentimeters(long microseconds)
 {
     return (float)(microseconds / 2) / 29;
 }

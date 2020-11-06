@@ -1,6 +1,3 @@
-///////////////////////
-// For Driving
-///////////////////////
 #define ENB 5
 #define IN1 7
 #define IN2 8
@@ -9,6 +6,12 @@
 #define ENA 6
 #define carSpeed 130
 int middleDistance, leftDistance, rightDistance;
+
+///////////////////////
+//                   //
+//  END GLOBAL VARS  //
+//                   //
+///////////////////////
 
 void initAutoPilot()
 {
@@ -19,11 +22,11 @@ void initAutoPilot()
     pinMode(IN4, OUTPUT);
     pinMode(ENA, OUTPUT);
     pinMode(ENB, OUTPUT);
-    stop();
+    stop(); // Stop for good measure..
 }
 
 /////////////////////////////////
-// Motor Driving Functions
+// Auto-Pilot Functions
 ////////////////////////////////
 void autoNavigation()
 {
@@ -54,6 +57,9 @@ void autoNavigation()
     }
 }
 
+/////////////////////////////////
+// Motor Driving Functions
+////////////////////////////////
 void forward()
 {
     analogWrite(ENA, carSpeed);
@@ -62,7 +68,6 @@ void forward()
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    //  Serial.println("Forward");
 }
 
 void reverse()
@@ -73,7 +78,6 @@ void reverse()
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, HIGH);
     digitalWrite(IN4, LOW);
-    //  Serial.println("Back");
 }
 
 void left()
@@ -84,7 +88,6 @@ void left()
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    //  Serial.println("Left");
 }
 
 void right()
@@ -95,12 +98,10 @@ void right()
     digitalWrite(IN2, LOW);
     digitalWrite(IN3, HIGH);
     digitalWrite(IN4, LOW);
-    //  Serial.println("Right");
 }
 
 void stop()
 {
     digitalWrite(ENA, LOW);
     digitalWrite(ENB, LOW);
-    //  Serial.println("Stop!");
 }

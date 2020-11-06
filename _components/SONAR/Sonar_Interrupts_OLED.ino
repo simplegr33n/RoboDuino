@@ -118,7 +118,7 @@ void setup()
   }
 
   // Draw unchanging header on display
-  drawHeader();
+  displayHeader();
 
   cli();
   DDRD = 0b00000100;      // set all bits in Port B Data Direction Register to input, except PCINT18 (our trigger)
@@ -189,9 +189,9 @@ void loop()
     ultrasonicResponseCount = 0;
     ultrasonicPingCount = 0;
 
-    D3_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[0]);
-    D4_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[1]);
-    D5_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[2]);
+    D3_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[0]);
+    D4_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[1]);
+    D5_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[2]);
 
     // Update pointer
     ultrasonicHistoryPointer++;
@@ -211,11 +211,11 @@ void loop()
     //    Serial.println("cm");
 
     // Update OLED Graph
-    drawGraph();
+    updateUltrasonicGraph();
   }
 }
 
-float microsToCM(long microseconds)
+float microsToCentimeters(long microseconds)
 {
   return (float)(microseconds / 2) / 29;
 }
@@ -223,7 +223,7 @@ float microsToCM(long microseconds)
 /////////////////////////////////
 // OLED Display functions
 ////////////////////////////////
-void drawHeader(void)
+void displayHeader(void)
 {
   display.clearDisplay();
 
@@ -251,18 +251,18 @@ void drawHeader(void)
   display.display();
 }
 
-void drawGraph(void)
+void updateUltrasonicGraph(void)
 {
   // Clear graph area for update
   display.fillRect(0, 16, 128, 48, SSD1306_WHITE);
 
   // Graph lines
-  drawGraphLines();
+  drawUltrasonicGraphLines();
 
   display.display();
 }
 
-void drawGraphLines(void)
+void drawUltrasonicGraphLines(void)
 {
   int currentLine = 0;
   for (unsigned int a = 0; a < 8; a++)

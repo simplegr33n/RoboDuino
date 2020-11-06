@@ -138,10 +138,10 @@ void setup()
             ; // Don't proceed, loop forever
     }
 
-    drawHeader();
+    displayHeader();
 }
 
-void drawHeader(void)
+void displayHeader(void)
 {
     display.clearDisplay();
 

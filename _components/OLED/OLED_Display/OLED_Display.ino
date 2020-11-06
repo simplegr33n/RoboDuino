@@ -67,13 +67,13 @@ void setup()
       ; // Don't proceed, loop forever
   }
 
-  drawHeader();
+  displayHeader();
 }
 
 void loop()
 {
   // Update graphs
-  drawGraph();
+  updateUltrasonicGraph();
   delay(500); // works right down to 1... (looks crazy)
 
   // Update pointer
@@ -84,7 +84,7 @@ void loop()
   }
 }
 
-void drawHeader(void)
+void displayHeader(void)
 {
   display.clearDisplay();
 
@@ -113,19 +113,19 @@ void drawHeader(void)
   display.display();
 }
 
-void drawGraph(void)
+void updateUltrasonicGraph(void)
 {
   // Clear graph area for update
   display.fillRect(0, 16, 128, 48, SSD1306_WHITE);
 
   // Graph lines
   // LEFT (0-32) -- MIDDLE (40-(64)-88) -- RIGHT (96-128)
-  drawGraphLines();
+  drawUltrasonicGraphLines();
 
   display.display();
 }
 
-void drawGraphLines(void)
+void drawUltrasonicGraphLines(void)
 {
   int currentLine = 0;
   for (unsigned int a = 0; a < 8; a++)

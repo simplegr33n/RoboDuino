@@ -142,10 +142,10 @@ void setup()
       ; // Don't proceed, loop forever
   }
 
-  drawHeader();
+  displayHeader();
 }
 
-void drawHeader(void)
+void displayHeader(void)
 {
   display.clearDisplay();
 
@@ -275,10 +275,11 @@ void loop()
     playTriggered = true;
   }
 
-  if (makeMeasurements && (micros() - lastSharpMeasurement > 500000)) {
+  if (makeMeasurements && (micros() - lastSharpMeasurement > 500000))
+  {
     lastSharpMeasurement = micros();
-    
-        int dis1 = SharpIR1.getDistance(); // this returns the distance for sensor 1
+
+    int dis1 = SharpIR1.getDistance(); // this returns the distance for sensor 1
 
     Serial.print("Distance: ");
     Serial.print(dis1);

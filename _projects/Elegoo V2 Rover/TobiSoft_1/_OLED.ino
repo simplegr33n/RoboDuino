@@ -1,16 +1,31 @@
-///////////////////////
-// OLED / ADAFRUIT Jazz
-///////////////////////
+/**************************************************************************
+ This is an example for our Monochrome OLEDs based on SSD1306 drivers
+
+ Pick one up today in the adafruit shop!
+ ------> http://www.adafruit.com/category/63_98
+
+ This example is for a 128x64 pixel display using I2C to communicate
+ 3 pins are required to interface (two I2C and one reset).
+
+ Adafruit invests time and resources providing this open
+ source code, please support Adafruit and open-source
+ hardware by purchasing products from Adafruit!
+
+ Written by Limor Fried/Ladyada for Adafruit Industries,
+ with contributions from the open source community.
+ BSD license, check license.txt for more information
+ All text above, and the splash screen below must be
+ included in any redistribution.
+ **************************************************************************/
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define SCREEN_WIDTH 128 // OLED pixel width
+#define SCREEN_HEIGHT 64 // OLED pixel height
 
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-#define OLED_RESET 4 // Reset pin # (or -1 if sharing Arduino reset pin)
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+#define OLED_RESET 4                                                      // Reset pin # (or -1 if sharing Arduino reset pin)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 
 #define LOGO_HEIGHT 16
 #define LOGO_WIDTH 16
@@ -32,6 +47,12 @@ static const unsigned char PROGMEM lena_bmp[] =
      B10110001, B11100110,
      B11011000, B00011100};
 
+///////////////////////
+//                   //
+//  END GLOBAL VARS  //
+//                   //
+///////////////////////
+
 void initOLED()
 {
     // Get display
@@ -43,13 +64,13 @@ void initOLED()
     }
 
     // Draw unchanging header on display
-    drawHeader();
+    displayHeader();
 }
 
 /////////////////////////////////
 // OLED Display functions
 ////////////////////////////////
-void drawHeader(void)
+void displayHeader(void)
 {
     display.clearDisplay();
 
@@ -65,7 +86,6 @@ void drawHeader(void)
     // L / R text
     display.setTextSize(2);              // Normal 1:1 pixel scale
     display.setTextColor(SSD1306_WHITE); // Draw white text
-    display.cp437(true);                 // Use full 256 char 'Code Page 437' font
     display.setCursor(24, 0);            // Start at top-left corner
     display.write('L');
     display.setCursor(96, 0); // Start at top-left corner
@@ -77,18 +97,18 @@ void drawHeader(void)
     display.display();
 }
 
-void drawGraph(void)
+void updateUltrasonicGraph(void)
 {
     // Clear graph area for update
     display.fillRect(0, 16, 128, 48, SSD1306_WHITE);
 
     // Graph lines
-    drawGraphLines();
+    drawUltrasonicGraphLines();
 
     display.display();
 }
 
-void drawGraphLines(void)
+void drawUltrasonicGraphLines(void)
 {
     int currentLine = 0;
     for (unsigned int a = 0; a < 8; a++)

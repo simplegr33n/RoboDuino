@@ -129,10 +129,10 @@ void setup()
       ; // Don't proceed, loop forever
   }
 
-  drawHeader();
+  displayHeader();
 }
 
-void drawHeader(void)
+void displayHeader(void)
 {
   display.clearDisplay();
 
@@ -162,7 +162,6 @@ int beats1[] = {
 int melody2[] = {
     NOTE_C2, NOTE_C2, NOTE_C2, NOTE_C4, NOTE_GS4, NOTE_AS4,
     NOTE_C3, NOTE_AS3, NOTE_C2};
-
 
 void rest(long duration)
 {
