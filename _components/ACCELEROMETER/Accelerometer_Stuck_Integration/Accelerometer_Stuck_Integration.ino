@@ -373,9 +373,13 @@ void sampleAccelerometer(void)
 {
   int x = analogRead(xPin); //read from xpin
 
-  if (((((float)x - 331.5) / 65 * 9.8) > 1) || ((((float)x - 331.5) / 65 * 9.8) < -1))
+  if (((((float)x - 331.5) / 65 * 9.8) > 1))
   {
     accelerometerAffirmCount++;
+  }
+  else if (((((float)x - 331.5) / 65 * 9.8) < -1))
+  {
+    accelerometerAffirmCount--;
   }
 
   accelerometerSampleCount++;
