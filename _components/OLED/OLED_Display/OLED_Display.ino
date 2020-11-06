@@ -53,7 +53,7 @@ int D3_history[8] = {0, 10, 33, 80, 4, 66, 63, 41};
 int D4_history[8] = {0, 20, 30, 40, 50, 60, 80, 100};
 int D5_history[8] = {15, 2, 150, 4, 25, 5, 73, 33};
 
-int historyPointer = 0;
+int ultrasonicHistoryPointer = 0;
 
 void setup()
 {
@@ -77,10 +77,10 @@ void loop()
   delay(500); // works right down to 1... (looks crazy)
 
   // Update pointer
-  historyPointer++;
-  if (historyPointer > 7)
+  ultrasonicHistoryPointer++;
+  if (ultrasonicHistoryPointer > 7)
   {
-    historyPointer = 0;
+    ultrasonicHistoryPointer = 0;
   }
 }
 
@@ -131,7 +131,7 @@ void drawGraphLines(void)
   for (unsigned int a = 0; a < 8; a++)
   {
     // determine actual currentIndex by reference to historyPointer
-    int currentIndex = historyPointer + a;
+    int currentIndex = ultrasonicHistoryPointer + a;
     if (currentIndex >= 8)
     {
       currentIndex = 0 + (currentIndex - 8);

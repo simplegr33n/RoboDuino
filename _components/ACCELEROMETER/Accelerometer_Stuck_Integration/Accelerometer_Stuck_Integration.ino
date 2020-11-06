@@ -3,15 +3,15 @@
 #include <TimerOne.h>
 
 volatile uint8_t portDstate, portDpast, changedBits;
-volatile bool interruptCalled = false;
+volatile bool ultrasonicInterruptCalled = false;
 
 volatile unsigned long triggerTime;
 
-const int numberOfSensors = 3;
-unsigned long responseDurations[numberOfSensors];
-unsigned long responseStarts[numberOfSensors] = {0, 0, 0};
-int responseCount = 0; // reset to zero and trigger sensors when responseCount = numberOfSensors
-volatile int pingCount = 0;
+const int ultrasonicSensorQuantity = 3;
+unsigned long ultrasonicResponseDurations[ultrasonicSensorQuantity];
+unsigned long ultrasonicResponseStarts[ultrasonicSensorQuantity] = {0, 0, 0};
+int ultrasonicResponseCount = 0; // reset to zero and trigger sensors when responseCount = numberOfSensors
+volatile int ultrasonicPingCount = 0;
 #define READING_INTERVAL 80000 // needs some tuning
 
 ///////////////////////
@@ -53,7 +53,7 @@ int D2_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int D3_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int D4_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 // Pointer for referencing position in history arrays
-int historyPointer = 0;
+int ultrasonicHistoryPointer = 0;
 
 ///////////////////////
 // For Driving
@@ -92,7 +92,7 @@ ISR(PCINT2_vect)
   portDpast = portDstate;
   portDstate = PIND; // Get state of Port D with PIND
   changedBits = portDpast ^ portDstate;
-  interruptCalled = true;
+  ultrasonicInterruptCalled = true;
 }
 
 void setup()
@@ -129,7 +129,7 @@ void setup()
   PCICR |= (1 << PCIE2);                                      // Pin Change Interrupt Control Register enabling Port D
   PCMSK2 |= (1 << PCINT18) | (1 << PCINT19) | (1 << PCINT20); // Enable mask on PCINT18-20 to trigger interrupt on state change
 
-  Timer1.initialize(READING_INTERVAL);    // (500000 = half a second, 30000 perhaps minimum)
+  Timer1.initialize(ULTRASONIC_INTERVAL); // (500000 = half a second, 30000 perhaps minimum)
   Timer1.attachInterrupt(triggerSensors); // TriggerSensors to run every readingInterval
   sei();
 }
@@ -137,72 +137,72 @@ void setup()
 void loop()
 {
 
-  if (interruptCalled)
+  if (ultrasonicInterruptCalled)
   {
-    interruptCalled = false;
+    ultrasonicInterruptCalled = false;
 
-    if (responseCount != numberOfSensors)
+    if (ultrasonicResponseCount != ultrasonicSensorQuantity)
     {
 
       // Get durations for each sensor response (one sensor per ping for now)
-      if ((pingCount == 1) && (changedBits & 0b00000100))
+      if ((ultrasonicPingCount == 1) && (changedBits & 0b00000100))
       {
-        if (responseStarts[0] != 0)
+        if (ultrasonicResponseStarts[0] != 0)
         {
-          responseDurations[0] = (micros() - responseStarts[0]);
-          responseCount++;
+          ultrasonicResponseDurations[0] = (micros() - ultrasonicResponseStarts[0]);
+          ultrasonicResponseCount++;
         }
         else
         {
-          responseStarts[0] = micros();
+          ultrasonicResponseStarts[0] = micros();
         }
       }
-      if ((pingCount == 2) && (changedBits & 0b00001000))
+      if ((ultrasonicPingCount == 2) && (changedBits & 0b00001000))
       {
-        if (responseStarts[1] != 0)
+        if (ultrasonicResponseStarts[1] != 0)
         {
-          responseDurations[1] = (micros() - responseStarts[1]);
-          responseCount++;
+          ultrasonicResponseDurations[1] = (micros() - ultrasonicResponseStarts[1]);
+          ultrasonicResponseCount++;
         }
         else
         {
-          responseStarts[1] = micros();
+          ultrasonicResponseStarts[1] = micros();
         }
       }
-      if ((pingCount == 3) && (changedBits & 0b00010000))
+      if ((ultrasonicPingCount == 3) && (changedBits & 0b00010000))
       {
-        if (responseStarts[2] != 0)
+        if (ultrasonicResponseStarts[2] != 0)
         {
-          responseDurations[2] = (micros() - responseStarts[2]);
-          responseCount++;
+          ultrasonicResponseDurations[2] = (micros() - ultrasonicResponseStarts[2]);
+          ultrasonicResponseCount++;
         }
         else
         {
-          responseStarts[2] = micros();
+          ultrasonicResponseStarts[2] = micros();
         }
       }
     }
   }
 
-  if (responseCount == numberOfSensors)
+  if (ultrasonicResponseCount == ultrasonicSensorQuantity)
   {
     cli();
-    responseCount = 0;
-    pingCount = 0;
+    ultrasonicResponseCount = 0;
+    ultrasonicPingCount = 0;
 
-    D2_history[historyPointer] = microsToCM(responseDurations[0]);
-    D3_history[historyPointer] = microsToCM(responseDurations[1]);
-    D4_history[historyPointer] = microsToCM(responseDurations[2]);
+    D2_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[0]);
+    D3_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[1]);
+    D4_history[ultrasonicHistoryPointer] = microsToCM(ultrasonicResponseDurations[2]);
 
-    leftDistance = D2_history[historyPointer]; // this sillyness only necessary because of graphing..
-    middleDistance = D3_history[historyPointer];
-    rightDistance = D4_history[historyPointer];
+    leftDistance = D2_history[ultrasonicHistoryPointer]; // this sillyness only necessary because of graphing..
+    middleDistance = D3_history[ultrasonicHistoryPointer];
+    rightDistance = D4_history[ultrasonicHistoryPointer];
 
     // Update pointer
-    historyPointer++;
-    if (historyPointer > 7)
+    ultrasonicHistoryPointer++;
+    if (ultrasonicHistoryPointer > 7)
     {
-      historyPointer = 0;
+      ultrasonicHistoryPointer = 0;
     }
     sei();
 
@@ -234,7 +234,7 @@ void loop()
   if ((micros() - lastPilotDecision > 10000))
   {
     lastPilotDecision = micros();
-    autoPilot();
+    autoNavigation();
   }
 }
 
@@ -256,24 +256,24 @@ void setTriggerPinsTo(uint8_t signalState)
 
 void triggerSensors(void)
 {
-  if ((responseCount == numberOfSensors))
+  if ((ultrasonicResponseCount == ultrasonicSensorQuantity))
   {
     // Do not trigger, previous responses not yet dealt with
     return;
   }
   else
   {
-    if ((responseCount == pingCount))
+    if ((ultrasonicResponseCount == ultrasonicPingCount))
     {
       // only advance pingCount if responseCount is caught up
-      pingCount++;
+      ultrasonicPingCount++;
     }
   }
 
   // reset response starts (todo: loop)
-  responseStarts[0] = 0;
-  responseStarts[1] = 0;
-  responseStarts[2] = 0;
+  ultrasonicResponseStarts[0] = 0;
+  ultrasonicResponseStarts[1] = 0;
+  ultrasonicResponseStarts[2] = 0;
 
   setTriggerPinsTo(LOW); // Set the trigger pins to LOW -- this falling edge triggers the sensor
   delayMicroseconds(10);
@@ -333,7 +333,7 @@ void drawGraphLines(void)
   for (unsigned int a = 0; a < 8; a++)
   {
     // determine actual currentIndex by reference to historyPointer, overflowing on 8
-    int currentIndex = historyPointer + a;
+    int currentIndex = ultrasonicHistoryPointer + a;
     if (currentIndex >= 8)
     {
       currentIndex = 0 + (currentIndex - 8);
@@ -405,13 +405,13 @@ void sampleAccelerometer(void)
 ////////////////////////////////
 
 // Determine appropriate DRIVE_STATE
-void autoPilot()
+void autoNavigation()
 {
   if (IS_STUCK == false)
   {
-    int leftDistance = microsToCM(responseDurations[0]);
-    int middleDistance = microsToCM(responseDurations[1]);
-    int rightDistance = microsToCM(responseDurations[2]);
+    int leftDistance = microsToCM(ultrasonicResponseDurations[0]);
+    int middleDistance = microsToCM(ultrasonicResponseDurations[1]);
+    int rightDistance = microsToCM(ultrasonicResponseDurations[2]);
 
     if ((middleDistance < 40) || (leftDistance < 30) || (rightDistance < 30))
     {
