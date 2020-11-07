@@ -25,6 +25,12 @@
 DFRobotDFPlayerMini myDFPlayer;
 void printDetail(uint8_t type, int value);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ///////////////                                                                                     //
+// END GLOBAL VARS                                                                                     //
+// ///////////////                                                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void initDFPLAYER()
 {
     //   Serial.begin(9600);
@@ -39,24 +45,15 @@ void initDFPLAYER()
     myDFPlayer.setTimeOut(500); //Set serial communictaion time out 500ms
 
     //----Set volume----
-    myDFPlayer.volume(30);   //Set volume value (0~30).
-    myDFPlayer.volumeUp();   //Volume Up
-    myDFPlayer.volumeDown(); //Volume Down
+    myDFPlayer.volume(30); //Set volume value (0~30).
+    // myDFPlayer.volumeUp();   //Volume Up
+    // myDFPlayer.volumeDown(); //Volume Down
 
     //----Set different EQ----
-    myDFPlayer.EQ(DFPLAYER_EQ_NORMAL);
-    //  myDFPlayer.EQ(DFPLAYER_EQ_POP);
-    //  myDFPlayer.EQ(DFPLAYER_EQ_ROCK);
-    //  myDFPlayer.EQ(DFPLAYER_EQ_JAZZ);
-    //  myDFPlayer.EQ(DFPLAYER_EQ_CLASSIC);
-    //  myDFPlayer.EQ(DFPLAYER_EQ_BASS);
+    myDFPlayer.EQ(DFPLAYER_EQ_NORMAL); // DFPLAYER_EQ_NORMAL, DFPLAYER_EQ_POP, DFPLAYER_EQ_ROCK, DFPLAYER_EQ_JAZZ, DFPLAYER_EQ_CLASSIC, DFPLAYER_EQ_BASS
 
     //----Set device we use SD as default----
-    //  myDFPlayer.outputDevice(DFPLAYER_DEVICE_U_DISK);
-    myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
-    //  myDFPlayer.outputDevice(DFPLAYER_DEVICE_AUX);
-    //  myDFPlayer.outputDevice(DFPLAYER_DEVICE_SLEEP);
-    //  myDFPlayer.outputDevice(DFPLAYER_DEVICE_FLASH);
+    myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD); // DFPLAYER_DEVICE_SD, DFPLAYER_DEVICE_U_DISK, DFPLAYER_DEVICE_AUX, DFPLAYER_DEVICE_SLEEP, DFPLAYER_DEVICE_FLASH
 
     //----Mp3 control----
     //  myDFPlayer.sleep();     //sleep
@@ -68,12 +65,12 @@ void initDFPLAYER()
     //----Mp3 play----
     //  myDFPlayer.next(); //Play next mp3
     //  myDFPlayer.previous(); //Play previous mp3
-    myDFPlayer.play(1); //Play the first mp3
+    // myDFPlayer.play(1); //Play the first mp3
     //  myDFPlayer.loop(1); //Loop the first mp3
     //  myDFPlayer.pause(); //pause the mp3
     //  myDFPlayer.start(); //start the mp3 from the pause
     //  myDFPlayer.playFolder(15, 4); //play specific mp3 in SD:/15/004.mp3; Folder Name(1~99); File Name(1~255)
-    //  myDFPlayer.enableLoopAll(); //loop all mp3 files.
+    myDFPlayer.enableLoopAll(); //loop all mp3 files.
     //  myDFPlayer.disableLoopAll(); //stop loop all mp3 files.
     //  myDFPlayer.playMp3Folder(4); //play specific mp3 in SD:/MP3/0004.mp3; File Name(0~65535)
     //  myDFPlayer.advertise(3); //advertise specific mp3 in SD:/ADVERT/0003.mp3; File Name(0~65535)
@@ -94,6 +91,9 @@ void initDFPLAYER()
     //  Serial.println(myDFPlayer.readFileCountsInFolder(3)); //read fill counts in folder SD:/03
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Print details from DFPlayer codes                                                                   //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 void printDetail(uint8_t type, int value)
 {
     switch (type)
