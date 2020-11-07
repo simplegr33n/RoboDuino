@@ -22,7 +22,7 @@ unsigned char i2c_rx_buf[16];
 unsigned char dirsend_flag = 0;
 
 unsigned long lastRead = 0;
-int lastReadDistance;
+int lastTOFReadDistance;
 
 /**************************************************************************
  This is an example for our Monochrome OLEDs based on SSD1306 drivers
@@ -128,7 +128,6 @@ void setup()
 {
     Wire.begin();
     Serial.begin(9600, SERIAL_8N1);
-    printf_begin();
 
     // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
@@ -160,41 +159,30 @@ void loop()
     if (micros() - lastRead > 10000)
     {
         lastRead = micros();
-        lastReadDistance = ReadDistance();
+        lastTOFReadDistance = ReadTOFDistance();
 
-        showMeasurement();
+        getTOFDistance();
     }
 }
 
-void showMeasurement()
+void getTOFDistance()
 {
 
     display.fillRect(76, 51, 51, 12, SSD1306_BLACK);
     display.setTextSize(1);              // Normal 1:1 pixel scale
     display.setTextColor(SSD1306_WHITE); // Draw white text
     display.setCursor(79, 54);
-    display.print(lastReadDistance);
+    display.print(lastTOFReadDistance);
     display.setCursor(110, 54);
     display.print("mm");
 
     display.display();
 
-    Serial.print(lastReadDistance);
+    Serial.print(lastTOFReadDistance);
     Serial.println(" mm");
 }
 
-int serial_putc(char c, struct __file *)
-{
-    Serial.write(c);
-    return c;
-}
-
-void printf_begin(void)
-{
-    fdevopen(&serial_putc, 0);
-}
-
-void SensorRead(unsigned char addr, unsigned char *datbuf, unsigned char cnt)
+void TOFSensorRead(unsigned char addr, unsigned char *datbuf, unsigned char cnt)
 {
     unsigned short result = 0;
     // step 1: instruct sensor to read echoes
@@ -204,7 +192,7 @@ void SensorRead(unsigned char addr, unsigned char *datbuf, unsigned char cnt)
     Wire.write(byte(addr)); // sets distance data address (addr)
     Wire.endTransmission(); // stop transmitting
     // step 2: wait for readings to happen
-    delay(1); // datasheet suggests at least 30uS
+    delayMicroseconds(100); // datasheet suggests at least 30uS
     // step 3: request reading from sensor
     Wire.requestFrom(82, cnt); // request cnt bytes from slave device #82 (0x52)
     // step 5: receive reading from sensor
@@ -215,12 +203,12 @@ void SensorRead(unsigned char addr, unsigned char *datbuf, unsigned char cnt)
     }
 }
 
-int ReadDistance()
+int ReadTOFDistance()
 {
-    SensorRead(0x00, i2c_rx_buf, 2);
+    TOFSensorRead(0x00, i2c_rx_buf, 2);
     lenth_val = i2c_rx_buf[0];
     lenth_val = lenth_val << 8;
     lenth_val |= i2c_rx_buf[1];
-    delay(100);
+    // delay(100);
     return lenth_val;
 }

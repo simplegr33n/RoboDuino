@@ -14,6 +14,12 @@ int D4_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int ultrasonicHistoryPointer = 0; // Pointer for referencing position in history arrays
 
 ///////////////////////
+// For TOF10120
+///////////////////////
+int tofReadDistance = 0;
+unsigned long lastTOFRead = 0; // micros() timestamp of last TOF10120 read
+
+///////////////////////
 // For Auto Pilot
 ///////////////////////
 unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
@@ -32,6 +38,8 @@ void setup()
 
   initUltrasonicInterrupts();
 
+  initTOF10120();
+
   initAutoPilot();
 }
 
@@ -43,6 +51,13 @@ void loop()
     resolveUltrasonicInterrupt();
   }
 
+  // Manage TOF10120
+  if ((lastTOFRead == 0) || (micros() - lastTOFRead > 20000))
+  {
+    lastTOFRead = micros();
+    readTOFDistance();
+  }
+
   // Update OLED Display
   if (ultrasonicResponseCount == ultrasonicSensorQuantity)
   {
@@ -51,7 +66,7 @@ void loop()
   }
 
   // Auto-Pilot
-  if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 100000))
+  if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 40000))
   {
     lastPilotDecision = micros();
     autoNavigation();

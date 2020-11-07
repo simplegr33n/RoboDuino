@@ -4,7 +4,7 @@
 #define IN3 9
 #define IN4 11
 #define ENA 6
-#define carSpeed 130
+#define carSpeed 160
 int middleDistance, leftDistance, rightDistance;
 
 ///////////////////////
@@ -30,11 +30,15 @@ void initAutoPilot()
 ////////////////////////////////
 void autoNavigation()
 {
-    int leftDistance = microsToCM(ultrasonicResponseDurations[0]);
-    int middleDistance = microsToCM(ultrasonicResponseDurations[1]);
-    int rightDistance = microsToCM(ultrasonicResponseDurations[2]);
+    int leftDistance = microsToCentimeters(ultrasonicResponseDurations[0]);
+    int middleDistance = microsToCentimeters(ultrasonicResponseDurations[1]);
+    if (tofReadDistance < middleDistance) // ensure the more proximate value is used
+    {
+        middleDistance = tofReadDistance;
+    }
+    int rightDistance = microsToCentimeters(ultrasonicResponseDurations[2]);
 
-    if ((middleDistance < 40) || (leftDistance < 30) || (rightDistance < 30))
+    if ((middleDistance < 30) || (leftDistance < 25) || (rightDistance < 25))
     {
         stop();
 
