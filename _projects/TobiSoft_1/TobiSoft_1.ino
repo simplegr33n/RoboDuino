@@ -40,6 +40,8 @@ void setup()
 
   initTOF10120();
 
+  initDFPLAYER();
+
   initAutoPilot();
 }
 

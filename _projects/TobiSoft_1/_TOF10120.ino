@@ -27,20 +27,7 @@ unsigned char dirsend_flag = 0;
 void initTOF10120()
 {
     Wire.begin();
-    // Serial.begin(9600, SERIAL_8N1);
-    // printf_begin();
 }
-
-// int serial_putc(char c, struct __file *)
-// {
-//     Serial.write(c);
-//     return c;
-// }
-
-// void printf_begin(void)
-// {
-//     fdevopen(&serial_putc, 0);
-// }
 
 void TOFSensorRead(unsigned char addr, unsigned char *datbuf, unsigned char cnt)
 {
