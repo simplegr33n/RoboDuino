@@ -32,7 +32,9 @@ unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDeci
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200); // Serial0 - Main debug/USB serial
+
+  Serial2.begin(9600); // Hardware Serial2 for DFPlayer -- seems to need 9600 baud
 
   initOLED();
 
@@ -40,7 +42,7 @@ void setup()
 
   initTOF10120();
 
-//  initDFPLAYER();
+  initDFPLAYER();
 
   initAutoPilot();
 }

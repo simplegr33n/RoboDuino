@@ -1,54 +1,96 @@
-[<img src="https://raw.githubusercontent.com/simplegr33n/RoboDuino/master/_assets/tobylogo2.bmp" width="600">](https://github.com/simplegr33n/RoboDuino/tree/master/TobiSoft_1)	
+[<img src="https://raw.githubusercontent.com/simplegr33n/RoboDuino/master/_assets/tobylogo2.bmp" width="600">](https://github.com/simplegr33n/RoboDuino/tree/master/TobiSoft_1)
 
 # TobySoft 2.0
 
 Arduino Mega based self driving car. Now with more crunchies.
 
 ## Sensors and Equipment
+
 **L298N** - Fairly general purpose small motor controller
 
 **SR04** (3x) - Front left, front middle, and front right array
 
 **TOF10120** - Front facing IR time of flight distance sensor
 
-**ADLX335** - Triple Axis Accelerometer *(actually not being utilized as of last verison of TobySoft 1.0)*
+**ADLX335** - Triple Axis Accelerometer _(actually not being utilized as of last verison of TobySoft 1.0)_
 
 **SSD1306** - 128x64 OLED screen
 
-**DFR0299** - DFPlayer Mini, a nifty little MP3 playing microcontroller *(and a small speaker for video game tunes)*
+**DFR0299** - DFPlayer Mini, a nifty little MP3 playing microcontroller _(and a small speaker for video game tunes)_
 
 ## Uno Pinout
 
-|Pin| *sensor* | *sensor pin* | *notes* |
-|--|--|--|--|
-|***A0***|  |  |
-|***A1***| Accelerometer | *X-Axis* |
-|***A2***|  |  |
-|***A3***|  |  |
-|***A4*** *II2C*| OLED (SSD1306) | *SDA* |
-|               | TOF10120 | *SDA* |
-|***A5*** *II2C*| OLED (SSD1306) | *SCL* |
-|               | TOF10120 | *SCL*|
-|***D0*** *(TX)*| DFR0299 | *RX* | use of 1k resistor to reduce noise
-|***D1*** *(RX)*| DFR0299 | *TX* |
-|***D2***| Left SR04  | *Echo* | pin change interrupt used for echo timing
-|***D3***| Center SR04 | *Echo* | pin change interrupt used for echo timing
-|***D4***| Right SR04  | *Echo* | pin change interrupt used for echo timing
-|***D5***| L298N |  |
-|***D6***| L298N  |  |
-|***D7***| L298N  |  |
-|***D8***| L298N  |  |
-|***D9***| L298N  |  |
-|***D10***| SR04 Trigger | *Trig* | single trigger pin for all SR04s
-|***D11***| L298N  |  |
-|***D12***| IR Receiver | *Out* |
-|***D13***| Onboard LED |  |
-
-
-
-
-
-
-
-
-
+| Pin             | _sensor_           | _sensor pin_ | _notes_                          |
+| --------------- | ------------------ | ------------ | -------------------------------- |
+| **_A0_**        |                    |              |
+| **_A1_**        | Accelerometer      | _X-Axis_     |
+| **_A2_**        |                    |              |
+| **_A3_**        |                    |              |
+| **_A4_**        |                    |              |
+| **_A5_**        |                    |              |
+| **_A6_**        |                    |              |
+| **_A7_**        |                    |              |
+| **_A8_**        |                    |              |
+| **_A9_**        |                    |              |
+| **_A10_**       |                    |              |
+| **_A11_**       |                    |              |
+| **_A12_**       |                    |              |
+| **_A13_**       | HC-SR04 (F-Center) | _Echo_       | utilizing PCINT21                |
+| **_A14_**       | HC-SR04 (F-Left)   | _Echo_       | utilizing PCINT22                |
+| **_A15_**       | HC-SR04 (F-Right)  | _Echo_       | utilizing PCINT23                |
+| **_D0_** _RX0_  |                    |              |
+| **_D1_** _TX0_  |                    |              |
+| **_D2_**        |                    |              |
+| **_D3_**        |                    |              |
+| **_D4_**        |                    |              |
+| **_D5_**        | L298N              |              |
+| **_D6_**        | L298N              |              |
+| **_D7_**        | L298N              |              |
+| **_D8_**        | L298N              |              |
+| **_D9_**        | L298N              |              |
+| **_D10_**       | SR04 Trigger       | _Trig_       | single trigger pin for all SR04s |
+| **_D11_**       | L298N              |              |
+| **_D12_**       | IR Receiver        | _Out_        |
+| **_D13_**       |                    |              |
+| **_D14_** _TX3_ |                    |              |
+| **_D15_** _RX3_ |                    |              |
+| **_D16_** _TX2_ | DFR0299            | _RX_         | 9600 baud                        |
+| **_D17_** _RX2_ | DFR0299            | _TX_         | 9600 baud                        |
+| **_D18_** _TX1_ |                    |              |
+| **_D19_** _RX1_ |                    |              |
+| **_D20_**       | OLED (SSD1306)     | _SDA_        |
+| _II2C - SDA_    | TOF10120           | _SDA_        |
+| **_D21_**       | OLED (SSD1306)     | _SCL_        |
+| _II2C - SCL_    | TOF10120           | _SCL_        |
+| **_D22_**       |                    |              |
+| **_D23_**       |                    |              |
+| **_D24_**       |                    |              |
+| **_D25_**       |                    |              |
+| **_D26_**       |                    |              |
+| **_D27_**       |                    |              |
+| **_D28_**       |                    |              |
+| **_D29_**       |                    |              |
+| **_D30_**       |                    |              |
+| **_D31_**       |                    |              |
+| **_D32_**       |                    |              |
+| **_D33_**       |                    |              |
+| **_D34_**       |                    |              |
+| **_D35_**       |                    |              |
+| **_D36_**       |                    |              |
+| **_D37_**       |                    |              |
+| **_D38_**       |                    |              |
+| **_D39_**       |                    |              |
+| **_D40_**       |                    |              |
+| **_D41_**       |                    |              |
+| **_D42_**       |                    |              |
+| **_D43_**       |                    |              |
+| **_D44_**       |                    |              |
+| **_D45_**       |                    |              |
+| **_D46_**       |                    |              |
+| **_D47_**       |                    |              |
+| **_D48_**       |                    |              |
+| **_D49_**       |                    |              |
+| **_D50_**       |                    |              |
+| **_D51_**       |                    |              |
+| **_D52_**       |                    |              |
+| **_D53_**       |                    |              |

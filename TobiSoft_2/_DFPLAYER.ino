@@ -22,6 +22,10 @@
 #include "Arduino.h"
 #include "DFRobotDFPlayerMini.h"
 
+#include <HardwareSerial.h>
+
+// HardwareSerial myDFSerial(2);
+
 DFRobotDFPlayerMini myDFPlayer;
 void printDetail(uint8_t type, int value);
 
@@ -33,9 +37,9 @@ void printDetail(uint8_t type, int value);
 
 void initDFPLAYER()
 {
-    //   Serial.begin(9600);
+    Serial.println(F("DFPlayer Mini online."));
 
-    if (!myDFPlayer.begin(Serial))
+    if (!myDFPlayer.begin(Serial2))
     { //Use softwareSerial to communicate with mp3.
         while (true)
             ;
