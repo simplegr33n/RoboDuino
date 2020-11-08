@@ -67,6 +67,8 @@ void setup()
       ; // Don't proceed, loop forever
   }
 
+  Serial.println("is it on?");
+
   displayHeader();
 }
 

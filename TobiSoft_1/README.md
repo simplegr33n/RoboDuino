@@ -31,8 +31,8 @@ Beyond having 5 hardware Serial ports to the Uno's 1, other advantages to the Me
 |               | TOF10120 | *SDA* |
 |***A5*** *II2C*| OLED (SSD1306) | *SCL* |
 |               | TOF10120 | *SCL*|
-|***D0*** *(TX)*| DF Mini MP3 Player | *RX* | use of 1k resistor to reduce noise
-|***D1*** *(RX)*| DF Mini MP3 Player | *TX* |
+|***D0*** *(TX)*| DFR0299 | *RX* | use of 1k resistor to reduce noise
+|***D1*** *(RX)*| DFR0299 | *TX* |
 |***D2***| Left SR04  | *Echo* | pin change interrupt used for echo timing
 |***D3***| Center SR04 | *Echo* | pin change interrupt used for echo timing
 |***D4***| Right SR04  | *Echo* | pin change interrupt used for echo timing

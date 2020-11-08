@@ -2,7 +2,8 @@
 #include <stdbool.h>
 #include <TimerOne.h>
 
-volatile uint8_t portDstate, portDpast, changedBitsD;
+// Port B
+volatile uint8_t portKstate, portKpast, changedBitsK;
 volatile bool ultrasonicInterruptCalled = false;
 
 volatile unsigned long triggerTime;
@@ -15,9 +16,9 @@ volatile int ultrasonicPingCount = 0;
 
 ISR(PCINT2_vect)
 {
-    portDpast = portDstate;
-    portDstate = PIND; // get state of Port D with PIND
-    changedBitsD = portDpast ^ portDstate;
+    portKpast = portKstate;
+    portKstate = PINK; // get state of Port K with PINB
+    changedBitsK = portKpast ^ portKstate;
     ultrasonicInterruptCalled = true;
 }
 
@@ -26,11 +27,10 @@ void setTriggerPinsTo(uint8_t signalState)
     switch (signalState)
     {
     case LOW:
-        PORTD &= ~(1UL << 2); // Set trigger pin D3 LOW
+        PORTB &= ~(1UL << 4); // Set trigger pin D10 LOW
         break;
     case HIGH:
-        // Port D handles D0 to D7
-        PORTD |= 1UL << 2; // Set trigger pin D3 HIGH
+        PORTB |= 1UL << 4; // Set trigger pin D10 HIGH
         break;
     default:
         break;
@@ -66,12 +66,12 @@ void triggerSensors(void)
 void setup()
 {
     cli();
-    DDRD = 0b00000100;      // set all bits in Port B Data Direction Register to input, except PCINT18 (our trigger)
+    DDRB = 0b00010000;      // set all bits in Port B Data Direction Register to input, except PCINT18 (our trigger)
     setTriggerPinsTo(HIGH); // ensure trigger pins at high before enabling interrupts
-    portDstate = PIND;
+    portKstate = PINK;      // Pin - K.. lol
     Serial.begin(9600);
-    PCICR |= (1 << PCIE2);                                      // Pin Change Interrupt Control Register enabling Port B
-    PCMSK2 |= (1 << PCINT19) | (1 << PCINT20) | (1 << PCINT21); // Enable mask on PCINT19 to trigger interupt on state change
+    PCICR |= (1 << PCIE2);                                      // Pin Change Interrupt Control Register enabling Port K
+    PCMSK2 |= (1 << PCINT21) | (1 << PCINT22) | (1 << PCINT23); // Enable mask on PCINT21-23 to trigger interrupt on state change
 
     Timer1.initialize(50000);               // 500000 = half a second
     Timer1.attachInterrupt(triggerSensors); // triggerSensors to run every readingInterval
@@ -89,7 +89,7 @@ void loop()
         {
 
             // Get durations for each sensor response (one sensor per ping for now)
-            if ((ultrasonicPingCount == 1) && (changedBitsD & 0b00001000))
+            if ((ultrasonicPingCount == 1) && (changedBitsK & 0b00100000)) // Pin Change Mask Register 2 location for Center (Pin A13)
             {
                 if (ultrasonicResponseStarts[0] != 0)
                 {
@@ -101,7 +101,7 @@ void loop()
                     ultrasonicResponseStarts[0] = micros();
                 }
             }
-            if ((ultrasonicPingCount == 2) && (changedBitsD & 0b00010000))
+            if ((ultrasonicPingCount == 2) && (changedBitsK & 0b01000000)) // Pin Change Mask Register 2 location for Right (Pin A14)
             {
                 if (ultrasonicResponseStarts[1] != 0)
                 {
@@ -113,7 +113,7 @@ void loop()
                     ultrasonicResponseStarts[1] = micros();
                 }
             }
-            if ((ultrasonicPingCount == 3) && (changedBitsD & 0b00100000))
+            if ((ultrasonicPingCount == 3) && (changedBitsK & 0b10000000)) // Pin Change Mask Register 2 location for Left (Pin A15)
             {
                 if (ultrasonicResponseStarts[2] != 0)
                 {
