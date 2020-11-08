@@ -49,7 +49,7 @@ void setup()
 
 void loop()
 {
-  // Manage ultrasonic interrupts
+  // Manage HC-SR04 interrupts
   if (ultrasonicInterruptCalled)
   {
     resolveUltrasonicInterrupt();
