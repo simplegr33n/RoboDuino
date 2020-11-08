@@ -36,13 +36,13 @@ void setup()
 
   Serial2.begin(9600); // Hardware Serial2 for DFPlayer -- seems to need 9600 baud
 
+  initDFPLAYER();
+
   initOLED();
 
   initUltrasonicInterrupts();
 
   initTOF10120();
-
-  initDFPLAYER();
 
   initAutoPilot();
 }
