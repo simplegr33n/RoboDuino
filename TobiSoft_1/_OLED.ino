@@ -64,13 +64,13 @@ void initOLED()
     }
 
     // Draw unchanging header on display
-    displayHeader();
+    displayUltrasonicHeader();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // OLED Display functions                                                                              //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-void displayHeader(void)
+void displayUltrasonicHeader(void)
 {
     display.clearDisplay();
 

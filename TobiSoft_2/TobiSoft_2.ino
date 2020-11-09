@@ -77,7 +77,10 @@ void loop()
   if (ultrasonicResponseCount == ultrasonicSensorQuantity)
   {
     updateUltrasonicHistory();
-    updateUltrasonicGraph();
+    if (AUTOPILOT_ON) // TODO: remove... for now just so i can enjoy sleep screen, eventually need more advanced display system.
+    {
+      updateUltrasonicGraph();
+    }
   }
 
   // Auto-Pilot
@@ -88,5 +91,9 @@ void loop()
       lastPilotDecision = micros();
       autoNavigation();
     }
+  }
+  else
+  {
+    displaySleepScreen();
   }
 }

@@ -68,25 +68,30 @@ void checkIR_Remote()
       else
       {
         AUTOPILOT_ON = true;
+        displayUltrasonicHeader();
       }
       break;
 
       // Driving
     case FWD:
       forward();
+      AUTOPILOT_ON = false;
       break;
     case B:
       reverse();
+      AUTOPILOT_ON = false;
       break;
     case L:
       left();
+      AUTOPILOT_ON = false;
       break;
     case R:
       right();
+      AUTOPILOT_ON = false;
       break;
     case S:
-      Serial.println("STOP!");
       stopCar();
+      AUTOPILOT_ON = false;
       break;
     default:
       break;

@@ -108,7 +108,7 @@ void setup()
   }
 
   // Draw unchanging header on display
-  displayHeader();
+  displayUltrasonicHeader();
 
   // Set up Motor Output Pins
   pinMode(IN1, OUTPUT);
@@ -288,7 +288,7 @@ float microsToCentimeters(long microseconds)
 /////////////////////////////////
 // OLED Display functions
 ////////////////////////////////
-void displayHeader(void)
+void displayUltrasonicHeader(void)
 {
   display.clearDisplay();
 

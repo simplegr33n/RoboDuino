@@ -118,7 +118,7 @@ void setup()
   }
 
   // Draw unchanging header on display
-  displayHeader();
+  displayUltrasonicHeader();
 
   cli();
   DDRD = 0b00000100;      // set all bits in Port B Data Direction Register to input, except PCINT18 (our trigger)
@@ -223,7 +223,7 @@ float microsToCentimeters(long microseconds)
 /////////////////////////////////
 // OLED Display functions
 ////////////////////////////////
-void displayHeader(void)
+void displayUltrasonicHeader(void)
 {
   display.clearDisplay();
 

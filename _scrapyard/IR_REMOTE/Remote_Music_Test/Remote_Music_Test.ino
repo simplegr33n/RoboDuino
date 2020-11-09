@@ -159,7 +159,7 @@ void setup()
     for (;;)
       ; // Don't proceed, loop forever
   }
-  displayHeader();
+  displayUltrasonicHeader();
 }
 
 void loop()
@@ -199,7 +199,7 @@ void loop()
   }
 }
 
-void displayHeader(void)
+void displayUltrasonicHeader(void)
 {
   display.clearDisplay();
 

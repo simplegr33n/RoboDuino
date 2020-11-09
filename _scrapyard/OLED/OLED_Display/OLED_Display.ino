@@ -69,7 +69,7 @@ void setup()
 
   Serial.println("is it on?");
 
-  displayHeader();
+  displayUltrasonicHeader();
 }
 
 void loop()
@@ -86,7 +86,7 @@ void loop()
   }
 }
 
-void displayHeader(void)
+void displayUltrasonicHeader(void)
 {
   display.clearDisplay();
 
