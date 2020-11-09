@@ -52,7 +52,6 @@ void resolveUltrasonicInterrupt()
         {
             if (ultrasonicResponseStarts[0] != 0)
             {
-                Serial.println("CENTER");
                 ultrasonicResponseDurations[0] = (micros() - ultrasonicResponseStarts[0]);
                 ultrasonicResponseCount++;
             }
@@ -65,7 +64,6 @@ void resolveUltrasonicInterrupt()
         {
             if (ultrasonicResponseStarts[1] != 0)
             {
-                Serial.println("LEFT");
                 ultrasonicResponseDurations[1] = (micros() - ultrasonicResponseStarts[1]);
                 ultrasonicResponseCount++;
             }
@@ -78,7 +76,6 @@ void resolveUltrasonicInterrupt()
         {
             if (ultrasonicResponseStarts[2] != 0)
             {
-                Serial.println("RIGHT");
                 ultrasonicResponseDurations[2] = (micros() - ultrasonicResponseStarts[2]);
                 ultrasonicResponseCount++;
             }

@@ -29,9 +29,9 @@
 #define RECV_PIN 12
 
 IRrecv irrecv(RECV_PIN);
-decode_results results;
-unsigned long val;
-unsigned long preMillis;
+decode_results IR_REMOTE_RESULTS;
+unsigned long IR_RemoteSignalValue;
+unsigned long IR_RemotePreMillis;
 
 ///////////////////
 // For the music...
@@ -165,13 +165,13 @@ void setup()
 void loop()
 {
   // REMOTE Decode
-  if (irrecv.decode(&results))
+  if (irrecv.decode(&IR_REMOTE_RESULTS))
   {
-    preMillis = millis();
-    val = results.value;
-    Serial.println(val);
+    IR_RemotePreMillis = millis();
+    IR_RemoteSignalValue = IR_REMOTE_RESULTS.value;
+    Serial.println(IR_RemoteSignalValue);
     irrecv.resume();
-    switch (val)
+    switch (IR_RemoteSignalValue)
     {
     case FWD:
       playTriggered = true;
@@ -182,9 +182,9 @@ void loop()
   }
   else
   {
-    if (millis() - preMillis > 500)
+    if (millis() - IR_RemotePreMillis > 500)
     {
-      preMillis = millis();
+      IR_RemotePreMillis = millis();
     }
   }
 

@@ -1,5 +1,3 @@
-//www.elegoo.com
-
 #include <IRremote.h>
 
 //------- IR REMOTE CODES ---------//
@@ -8,11 +6,11 @@
 #define L 16720605           // LEFT
 #define R 16761405           // RIGHT
 #define S 16712445           // STOP
-#define UNKNOWN_F 5316027    // FORWARD
-#define UNKNOWN_B 2747854299 // BACK
-#define UNKNOWN_L 1386468383 // LEFT
-#define UNKNOWN_R 553536955  // RIGHT
-#define UNKNOWN_S 3622325019 // STOP
+#define UNKNOWN_F 5316027    // FORWARD (secondary code?)
+#define UNKNOWN_B 2747854299 // BACK (secondary code?)
+#define UNKNOWN_L 1386468383 // LEFT (secondary code?)
+#define UNKNOWN_R 553536955  // RIGHT (secondary code?)
+#define UNKNOWN_S 3622325019 // STOP (secondary code?)
 #define KEY1 16738455
 #define KEY2 16750695
 #define KEY3 16756815
@@ -33,52 +31,52 @@ decode_results IR_REMOTE_RESULTS;
 unsigned long IR_RemoteSignalValue;
 unsigned long IR_RemotePreMillis;
 
-void forward()
+void initIR_Remote()
 {
-  Serial.println("go forward!");
-}
-
-void back()
-{
-  Serial.println("go back!");
-}
-
-void left()
-{
-  Serial.println("go left!");
-}
-
-void right()
-{
-  Serial.println("go right!");
-}
-
-void stop()
-{
-  Serial.println("STOP!");
-}
-
-void setup()
-{
-  Serial.begin(9600);
   irrecv.enableIRIn();
 }
 
-void loop()
+void checkIR_Remote()
 {
   if (irrecv.decode(&IR_REMOTE_RESULTS))
   {
     IR_RemotePreMillis = millis();
     IR_RemoteSignalValue = IR_REMOTE_RESULTS.value;
-    Serial.println(IR_RemoteSignalValue);
     irrecv.resume();
     switch (IR_RemoteSignalValue)
     {
+    case KEY7:
+      // Play FF7 folder
+      if (MUSIC_ON == true)
+      {
+        myDFPlayer.pause();
+        MUSIC_ON = false;
+      }
+      else
+      {
+        myDFPlayer.randomAll();
+        MUSIC_ON = true;
+      }
+      break;
+    case KEY_STAR:
+      // Start/Stop autonomous function
+      if (AUTOPILOT_ON == true)
+      {
+        stopCar();
+        AUTOPILOT_ON = false;
+      }
+      else
+      {
+        AUTOPILOT_ON = true;
+      }
+      break;
+
+      // Driving
     case FWD:
       forward();
       break;
     case B:
-      back();
+      reverse();
       break;
     case L:
       left();
@@ -87,7 +85,8 @@ void loop()
       right();
       break;
     case S:
-      stop();
+      Serial.println("STOP!");
+      stopCar();
       break;
     default:
       break;

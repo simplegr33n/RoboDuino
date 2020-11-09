@@ -22,7 +22,7 @@ void initAutoPilot()
     pinMode(IN4, OUTPUT);
     pinMode(ENA, OUTPUT);
     pinMode(ENB, OUTPUT);
-    stop(); // Stop for good measure..
+    stopCar(); // Stop for good measure..
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ void autoNavigation()
 
     if ((middleDistance < 30) || (leftDistance < 25) || (rightDistance < 25))
     {
-        stop();
+        stopCar();
 
         if ((rightDistance < 20) && (leftDistance < 20))
         {
@@ -104,7 +104,7 @@ void right()
     digitalWrite(IN4, LOW);
 }
 
-void stop()
+void stopCar()
 {
     digitalWrite(ENA, LOW);
     digitalWrite(ENB, LOW);

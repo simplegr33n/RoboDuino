@@ -1,4 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+// For main loop()                                                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool AUTOPILOT_ON = false;
+bool MUSIC_ON = false;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For Ultrasonic                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ultrasonicSensorQuantity 3 // Number of ultrasonic sensors hooked up
@@ -36,6 +42,8 @@ void setup()
 
   Serial2.begin(9600); // Hardware Serial2 for DFPlayer -- seems to need 9600 baud
 
+  initIR_Remote();
+
   initDFPLAYER();
 
   initOLED();
@@ -49,6 +57,9 @@ void setup()
 
 void loop()
 {
+  // Check for IR remote signal
+  checkIR_Remote();
+
   // Manage HC-SR04 interrupts
   if (ultrasonicInterruptCalled)
   {
@@ -70,9 +81,12 @@ void loop()
   }
 
   // Auto-Pilot
-  if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 40000))
+  if (AUTOPILOT_ON)
   {
-    lastPilotDecision = micros();
-    autoNavigation();
+    if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 40000))
+    {
+      lastPilotDecision = micros();
+      autoNavigation();
+    }
   }
 }
