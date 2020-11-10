@@ -6,6 +6,8 @@
 #define ENA 6
 #define carSpeed 160
 int middleDistance, leftDistance, rightDistance;
+bool handlingCollision = false;
+unsigned long collisionStart = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -30,6 +32,12 @@ void initAutoPilot()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void autoNavigation()
 {
+    if (handlingCollision)
+    {
+        handleCollisionEvent();
+        return;
+    }
+
     int leftDistance = microsToCentimeters(ultrasonicResponseDurations[1]);
     int middleDistance = microsToCentimeters(ultrasonicResponseDurations[0]);
     if (tofReadDistance < middleDistance) // ensure the more proximate value is used
@@ -63,27 +71,43 @@ void autoNavigation()
 
 void handleCollisionEvent()
 {
-    stopCar();
-    playTobyIntroMP3();
-    delay(2000);
-
-    if (ultrasonicResponseDurations[2] > ultrasonicResponseDurations[1]) // Right v Left
+    if (collisionStart == 0)
     {
-        reverse();
-        delay(200);
-        right();
-        delay(200);
-    }
-    else
-    {
-        reverse();
-        delay(200);
-        left();
-        delay(200);
+        handlingCollision = true;
+        collisionStart = millis();
+        stopCar();
+        playTobyIntroMP3();
     }
 
-    stopCar();
-    delay(500);
+    if (millis() - collisionStart > 2000)
+    {
+        reverse();
+    }
+
+    if (millis() - collisionStart > 2150)
+    {
+        if (ultrasonicResponseDurations[2] > ultrasonicResponseDurations[1]) // Right v Left
+        {
+            right();
+            delay(200);
+        }
+        else
+        {
+            left();
+            delay(200);
+        }
+    }
+
+    if (millis() - collisionStart > 2300)
+    {
+        stopCar();
+    }
+
+    if (millis() - collisionStart > 3300)
+    {
+        handlingCollision = false;
+        collisionStart = 0;
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

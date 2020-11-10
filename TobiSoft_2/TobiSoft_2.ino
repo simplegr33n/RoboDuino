@@ -5,13 +5,16 @@ bool AUTOPILOT_ON = false;
 bool MUSIC_ON = false;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+// For Accelerometer                                                                                  //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For Ultrasonic                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ultrasonicSensorQuantity 3 // Number of ultrasonic sensors hooked up
 // Interrupt variables
 volatile uint8_t portKstate, portKpast, changedBitsK;
 volatile bool ultrasonicInterruptCalled = false;
-int ultrasonicResponseCount = 0; // trigger sensors when ultrasonicResponseCount == ultrasonicSensorQuantity
 unsigned long ultrasonicResponseDurations[ultrasonicSensorQuantity];
 // Historical distance readings
 int D2_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -19,6 +22,7 @@ int D3_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int D4_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int ultrasonicHistoryPointer = 0; // Pointer for referencing position in history arrays
 // Timer
+#define ULTRASONIC_INTERVAL 500000 // needs some tuning (500000 = half a second, 30000 perhaps minimum)
 unsigned long lastUltrasonicTrigger = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,11 +69,11 @@ void loop()
   // Check for IR remote signal
   checkIR_Remote();
 
-  // // Manage HC-SR04 Triggers
-  // if (micros() - lastUltrasonicTrigger > 80000)
-  // {
-  //   triggerSensors();
-  // }
+  // Manage HC-SR04 Triggers
+  if (micros() - lastUltrasonicTrigger > ULTRASONIC_INTERVAL)
+  {
+    triggerSensors();
+  }
 
   // Manage HC-SR04 interrupts
   if (ultrasonicInterruptCalled)
@@ -82,16 +86,6 @@ void loop()
   {
     lastTOFRead = micros();
     readTOFDistance();
-  }
-
-  // Update OLED Display
-  if (ultrasonicResponseCount == ultrasonicSensorQuantity)
-  {
-    updateUltrasonicHistory();
-    if (AUTOPILOT_ON) // TODO: remove... for now just so i can enjoy sleep screen, eventually need more advanced display system.
-    {
-      updateUltrasonicGraph();
-    }
   }
 
   // Auto-Pilot

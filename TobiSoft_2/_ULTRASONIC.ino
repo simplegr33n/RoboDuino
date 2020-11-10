@@ -1,9 +1,6 @@
-#include <TimerOne.h>
-
-#define ULTRASONIC_INTERVAL 80000 // needs some tuning (500000 = half a second, 30000 perhaps minimum)
-
-unsigned long ultrasonicResponseStarts[ultrasonicSensorQuantity];
-volatile int ultrasonicPingCount = 0;
+volatile unsigned long ultrasonicResponseStarts[ultrasonicSensorQuantity];
+volatile unsigned long ultrasonicResponseEnds[ultrasonicSensorQuantity];
+volatile int ultrasonicResponseCount = 0; // trigger history update when ultrasonicResponseCount == ultrasonicSensorQuantity
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -22,9 +19,6 @@ void initUltrasonicInterrupts()
 
     PCICR |= (1 << PCIE2);                                      // Pin Change Interrupt Control Register enabling Port K
     PCMSK2 |= (1 << PCINT21) | (1 << PCINT22) | (1 << PCINT23); // Enable mask on PCINT21-23 to trigger interrupt on state change
-
-    Timer1.initialize(ULTRASONIC_INTERVAL);
-    Timer1.attachInterrupt(triggerSensors); // triggerSensors every defined reading interval
     sei();
 }
 
@@ -42,17 +36,19 @@ ISR(PCINT2_vect)
 void resolveUltrasonicInterrupt()
 {
 
+    cli();
+
     ultrasonicInterruptCalled = false;
 
     if (ultrasonicResponseCount != ultrasonicSensorQuantity)
     {
 
-        // Get durations for each sensor response (one sensor per ping for now)
-        if ((ultrasonicPingCount == 1) && (changedBitsK & 0b00100000))
+        // Get durations for each sensor response
+        if (ultrasonicResponseCount == 0 && (changedBitsK & 0b00100000) && (ultrasonicResponseEnds[0] == 0))
         {
             if (ultrasonicResponseStarts[0] != 0)
             {
-                ultrasonicResponseDurations[0] = (micros() - ultrasonicResponseStarts[0]);
+                ultrasonicResponseEnds[0] = micros();
                 ultrasonicResponseCount++;
             }
             else
@@ -60,11 +56,11 @@ void resolveUltrasonicInterrupt()
                 ultrasonicResponseStarts[0] = micros();
             }
         }
-        if ((ultrasonicPingCount == 2) && (changedBitsK & 0b01000000))
+        if (ultrasonicResponseCount == 1 && (changedBitsK & 0b01000000) && (ultrasonicResponseEnds[1] == 0))
         {
             if (ultrasonicResponseStarts[1] != 0)
             {
-                ultrasonicResponseDurations[1] = (micros() - ultrasonicResponseStarts[1]);
+                ultrasonicResponseEnds[1] = micros();
                 ultrasonicResponseCount++;
             }
             else
@@ -72,11 +68,11 @@ void resolveUltrasonicInterrupt()
                 ultrasonicResponseStarts[1] = micros();
             }
         }
-        if ((ultrasonicPingCount == 3) && (changedBitsK & 0b10000000))
+        if (ultrasonicResponseCount == 2 && (changedBitsK & 0b10000000) && (ultrasonicResponseEnds[2] == 0))
         {
             if (ultrasonicResponseStarts[2] != 0)
             {
-                ultrasonicResponseDurations[2] = (micros() - ultrasonicResponseStarts[2]);
+                ultrasonicResponseEnds[2] = micros();
                 ultrasonicResponseCount++;
             }
             else
@@ -85,6 +81,8 @@ void resolveUltrasonicInterrupt()
             }
         }
     }
+
+    sei();
 }
 
 void updateUltrasonicHistory()
@@ -92,7 +90,11 @@ void updateUltrasonicHistory()
     cli();
     // Refresh Interrupt counts
     ultrasonicResponseCount = 0;
-    ultrasonicPingCount = 0;
+
+    // update durations
+    ultrasonicResponseDurations[0] = ultrasonicResponseEnds[0] - ultrasonicResponseStarts[0];
+    ultrasonicResponseDurations[1] = ultrasonicResponseEnds[1] - ultrasonicResponseStarts[1];
+    ultrasonicResponseDurations[2] = ultrasonicResponseEnds[2] - ultrasonicResponseStarts[2];
 
     // Update history entries
     D2_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[0]);
@@ -105,6 +107,16 @@ void updateUltrasonicHistory()
     {
         ultrasonicHistoryPointer = 0;
     }
+
+    // Refresh response starts (todo: loop)
+    ultrasonicResponseStarts[0] = 0;
+    ultrasonicResponseStarts[1] = 0;
+    ultrasonicResponseStarts[2] = 0;
+    // Refresh response ends
+    ultrasonicResponseEnds[0] = 0;
+    ultrasonicResponseEnds[1] = 0;
+    ultrasonicResponseEnds[2] = 0;
+
     sei();
 }
 
@@ -130,22 +142,15 @@ void triggerSensors(void)
 {
     if ((ultrasonicResponseCount == ultrasonicSensorQuantity))
     {
-        // Do not trigger, previous responses not yet dealt with
-        return;
-    }
-    else
-    {
-        if ((ultrasonicResponseCount == ultrasonicPingCount))
+        updateUltrasonicHistory();
+        if (AUTOPILOT_ON) // TODO: remove... for now just so i can enjoy sleep screen, eventually need more advanced display system.
         {
-            // only advance pingCount if responseCount is caught up
-            ultrasonicPingCount++;
+            updateUltrasonicGraph();
         }
-    }
 
-    // reset response starts (todo: loop)
-    ultrasonicResponseStarts[0] = 0;
-    ultrasonicResponseStarts[1] = 0;
-    ultrasonicResponseStarts[2] = 0;
+        // Do not trigger, previous responses not yet dealt with
+        // return;
+    }
 
     setTriggerPinsTo(LOW); // Set the trigger pins to LOW, falling edge triggers the sensor
     delayMicroseconds(10);
