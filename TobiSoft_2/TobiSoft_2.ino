@@ -18,6 +18,8 @@ int D2_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int D3_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int D4_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int ultrasonicHistoryPointer = 0; // Pointer for referencing position in history arrays
+// Timer
+unsigned long lastUltrasonicTrigger = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For TOF10120                                                                                        //
@@ -57,8 +59,17 @@ void setup()
 
 void loop()
 {
+  // Check accelerometer for a collision
+  checkForCollision();
+
   // Check for IR remote signal
   checkIR_Remote();
+
+  // // Manage HC-SR04 Triggers
+  // if (micros() - lastUltrasonicTrigger > 80000)
+  // {
+  //   triggerSensors();
+  // }
 
   // Manage HC-SR04 interrupts
   if (ultrasonicInterruptCalled)

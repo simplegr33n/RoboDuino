@@ -30,8 +30,8 @@ void initAutoPilot()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void autoNavigation()
 {
-    int leftDistance = microsToCentimeters(ultrasonicResponseDurations[0]);
-    int middleDistance = microsToCentimeters(ultrasonicResponseDurations[1]);
+    int leftDistance = microsToCentimeters(ultrasonicResponseDurations[1]);
+    int middleDistance = microsToCentimeters(ultrasonicResponseDurations[0]);
     if (tofReadDistance < middleDistance) // ensure the more proximate value is used
     {
         middleDistance = tofReadDistance;
@@ -59,6 +59,31 @@ void autoNavigation()
     {
         forward();
     }
+}
+
+void handleCollisionEvent()
+{
+    stopCar();
+    playTobyIntroMP3();
+    delay(2000);
+
+    if (ultrasonicResponseDurations[2] > ultrasonicResponseDurations[1]) // Right v Left
+    {
+        reverse();
+        delay(200);
+        right();
+        delay(200);
+    }
+    else
+    {
+        reverse();
+        delay(200);
+        left();
+        delay(200);
+    }
+
+    stopCar();
+    delay(500);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
