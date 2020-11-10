@@ -1,3 +1,5 @@
+// Interrupt variables
+volatile uint8_t portKstate, portKpast, changedBitsK;
 volatile unsigned long ultrasonicResponseStarts[ultrasonicSensorQuantity];
 volatile unsigned long ultrasonicResponseEnds[ultrasonicSensorQuantity];
 volatile int ultrasonicResponseCount = 0; // trigger history update when ultrasonicResponseCount == ultrasonicSensorQuantity
@@ -43,7 +45,7 @@ void resolveUltrasonicInterrupt()
     if (ultrasonicResponseCount != ultrasonicSensorQuantity)
     {
 
-        // Get durations for each sensor response
+        // Get durations for each sensor response (Sequentially based on ultrasonicResponseCount)
         if (ultrasonicResponseCount == 0 && (changedBitsK & 0b00100000) && (ultrasonicResponseEnds[0] == 0))
         {
             if (ultrasonicResponseStarts[0] != 0)
@@ -147,9 +149,6 @@ void triggerSensors(void)
         {
             updateUltrasonicGraph();
         }
-
-        // Do not trigger, previous responses not yet dealt with
-        // return;
     }
 
     setTriggerPinsTo(LOW); // Set the trigger pins to LOW, falling edge triggers the sensor

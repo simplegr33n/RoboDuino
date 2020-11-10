@@ -5,15 +5,11 @@ bool AUTOPILOT_ON = false;
 bool MUSIC_ON = false;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// For Accelerometer                                                                                  //
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For Ultrasonic                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ultrasonicSensorQuantity 3 // Number of ultrasonic sensors hooked up
-// Interrupt variables
-volatile uint8_t portKstate, portKpast, changedBitsK;
+#define ULTRASONIC_INTERVAL 60000  // needs some tuning (30000 perhaps minimum)
+unsigned long lastUltrasonicTrigger = 0;
 volatile bool ultrasonicInterruptCalled = false;
 unsigned long ultrasonicResponseDurations[ultrasonicSensorQuantity];
 // Historical distance readings
@@ -21,9 +17,6 @@ int D2_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int D3_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int D4_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int ultrasonicHistoryPointer = 0; // Pointer for referencing position in history arrays
-// Timer
-#define ULTRASONIC_INTERVAL 500000 // needs some tuning (500000 = half a second, 30000 perhaps minimum)
-unsigned long lastUltrasonicTrigger = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For TOF10120                                                                                        //
@@ -72,6 +65,7 @@ void loop()
   // Manage HC-SR04 Triggers
   if (micros() - lastUltrasonicTrigger > ULTRASONIC_INTERVAL)
   {
+    lastUltrasonicTrigger = micros();
     triggerSensors();
   }
 
