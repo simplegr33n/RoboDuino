@@ -24,7 +24,7 @@
 #define SCREEN_WIDTH 128 // OLED pixel width
 #define SCREEN_HEIGHT 64 // OLED pixel height
 
-#define OLED_RESET 4                                                      // Reset pin # (or -1 if sharing Arduino reset pin)
+int OLED_RESET = 4;                                                       // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,7 +214,7 @@ void displayUltrasonicHeader(void)
         tobysoft_2, 128, 64, 1);
 
     display.display();
-    delay(4000); // show for 4 seconds?
+    delay(1000); // show for 4 seconds?
 
     display.clearDisplay();
 

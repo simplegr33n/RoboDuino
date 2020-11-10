@@ -5,16 +5,37 @@ Analog 1: x-axis
 */
 
 #define accelerometerPinX A1 // x-axis of the accelerometer
+float collisionThresholdForward = 1.35;
+float collisionThresholdTurn = 1.35;
 
-bool checkForCollision()
+void checkForCollision()
 {
-    int x = analogRead(accelerometerPinX); //read from xpin
-
-    if (((((float)x - 331.5) / 65) > 1.1)) // Collision detected!
+    if ((DRIVE_INSTRUCTION == "STOP") || (DRIVE_INSTRUCTION == "REVERSE"))
     {
-        handleCollisionEvent();
-
-        // Serial.print(((float)x - 331.5) / 65); //print x value on serial monitor
-        // Serial.println("m/s²");
+        return; // Ignore accelerometer
     }
+
+    if (DRIVE_INSTRUCTION == "FORWARD")
+    {
+        int x = analogRead(accelerometerPinX); //read from xpin
+
+        if (((((float)x - 331.5) / 65) > collisionThresholdForward)) // Collision detected!
+        {
+            handleCollisionEvent();
+        }
+    }
+
+    if ((DRIVE_INSTRUCTION == "LEFT") || (DRIVE_INSTRUCTION == "RIGHT"))
+    {
+        int x = analogRead(accelerometerPinX); //read from xpin
+
+        if (((((float)x - 331.5) / 65) > collisionThresholdTurn)) // Collision detected!
+        {
+            handleCollisionEvent();
+        }
+    }
+
+    // DEBUG
+    // Serial.print(((float)x - 331.5) / 65); //print x value on serial monitor
+    // Serial.println("m/s²");
 }

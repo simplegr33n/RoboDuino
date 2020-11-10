@@ -54,11 +54,11 @@ void autoNavigation()
         {
             reverse();
         }
-        else if (rightDistance > leftDistance)
+        else if (rightDistance > 20)
         {
             right();
         }
-        else if (rightDistance < leftDistance)
+        else if (rightDistance < 20)
         {
             left();
         }
@@ -76,15 +76,15 @@ void handleCollisionEvent()
         handlingCollision = true;
         collisionStart = millis();
         stopCar();
-        playTobyIntroMP3();
+        // todo: show something on screen
     }
 
-    if (millis() - collisionStart > 2000)
+    if (millis() - collisionStart > 100)
     {
         reverse();
     }
 
-    if (millis() - collisionStart > 2150)
+    if (millis() - collisionStart > 250)
     {
         if (ultrasonicResponseDurations[2] > ultrasonicResponseDurations[1]) // Right v Left
         {
@@ -98,12 +98,12 @@ void handleCollisionEvent()
         }
     }
 
-    if (millis() - collisionStart > 2300)
+    if (millis() - collisionStart > 400)
     {
         stopCar();
     }
 
-    if (millis() - collisionStart > 3300)
+    if (millis() - collisionStart > 500)
     {
         handlingCollision = false;
         collisionStart = 0;
@@ -115,6 +115,7 @@ void handleCollisionEvent()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void forward()
 {
+    DRIVE_INSTRUCTION = "FORWARD";
     analogWrite(ENA, carSpeed);
     analogWrite(ENB, carSpeed);
     digitalWrite(IN1, HIGH);
@@ -125,6 +126,7 @@ void forward()
 
 void reverse()
 {
+    DRIVE_INSTRUCTION = "REVERSE";
     analogWrite(ENA, carSpeed);
     analogWrite(ENB, carSpeed);
     digitalWrite(IN1, LOW);
@@ -135,6 +137,7 @@ void reverse()
 
 void left()
 {
+    DRIVE_INSTRUCTION = "LEFT";
     analogWrite(ENA, carSpeed);
     analogWrite(ENB, carSpeed);
     digitalWrite(IN1, LOW);
@@ -145,6 +148,7 @@ void left()
 
 void right()
 {
+    DRIVE_INSTRUCTION = "RIGHT";
     analogWrite(ENA, carSpeed);
     analogWrite(ENB, carSpeed);
     digitalWrite(IN1, HIGH);
@@ -155,6 +159,7 @@ void right()
 
 void stopCar()
 {
+    DRIVE_INSTRUCTION = "STOP";
     digitalWrite(ENA, LOW);
     digitalWrite(ENB, LOW);
 }

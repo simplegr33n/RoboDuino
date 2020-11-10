@@ -8,7 +8,7 @@ bool MUSIC_ON = false;
 // For Ultrasonic                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ultrasonicSensorQuantity 3 // Number of ultrasonic sensors hooked up
-#define ULTRASONIC_INTERVAL 60000  // needs some tuning (30000 perhaps minimum)
+#define ULTRASONIC_INTERVAL 20000  // needs some tuning (30000 perhaps minimum)
 unsigned long lastUltrasonicTrigger = 0;
 volatile bool ultrasonicInterruptCalled = false;
 unsigned long ultrasonicResponseDurations[ultrasonicSensorQuantity];
@@ -28,6 +28,7 @@ unsigned long lastTOFRead = 0; // micros() timestamp of last TOF10120 read
 // For Auto-Pilot                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
+String DRIVE_INSTRUCTION;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -63,11 +64,7 @@ void loop()
   checkIR_Remote();
 
   // Manage HC-SR04 Triggers
-  if (micros() - lastUltrasonicTrigger > ULTRASONIC_INTERVAL)
-  {
-    lastUltrasonicTrigger = micros();
-    triggerSensors();
-  }
+  triggerSensors();
 
   // Manage HC-SR04 interrupts
   if (ultrasonicInterruptCalled)

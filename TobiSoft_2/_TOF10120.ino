@@ -44,7 +44,7 @@ void TOFSensorRead(unsigned char addr, unsigned char *datbuf, unsigned char cnt)
     // step 2: wait for readings to happen
     delayMicroseconds(100); // datasheet suggests at least 30uS
     // step 3: request reading from sensor
-    Wire.requestFrom(82, cnt); // request cnt bytes from slave device #82 (0x52)
+    Wire.requestFrom(82, (int)cnt); // request cnt bytes from slave device #82 (0x52)
     // step 5: receive reading from sensor
     if (cnt <= Wire.available())
     {                            // if two bytes were received
