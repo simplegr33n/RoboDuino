@@ -1,5 +1,4 @@
-// SimpleTx - the master or the transmitter
-
+// TobySoft Transmitter (For remote RF control)
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
@@ -11,19 +10,17 @@ const byte slaveAddress[5] = {'R', 'x', 'A', 'A', 'A'};
 
 RF24 radio(CE_PIN, CSN_PIN); // Create a Radio
 
-char dataToSend[10] = "Message 0";
-char txNum = '0';
+int joystickAngles[2];
 
 unsigned long currentMillis;
 unsigned long prevMillis;
-unsigned long txIntervalMillis = 1000; // send once per second
+unsigned long txIntervalMillis = 250; // send four times per second
 
 void setup()
 {
-
     Serial.begin(9600);
 
-    Serial.println("SimpleTx Starting");
+    Serial.println("TobySoft Transmitter Starting");
 
     radio.begin();
     radio.setDataRate(RF24_250KBPS);
@@ -48,33 +45,32 @@ void loop()
 void send()
 {
 
+    int xPotValue = analogRead(A0);
+    int xAngleValue = map(xPotValue, 0, 1023, 0, 180);
+    int yPotValue = analogRead(A1);
+    int yAngleValue = map(yPotValue, 0, 1023, 0, 180);
+
+    Serial.println("Send X");
+    Serial.println(xAngleValue);
+    Serial.println("Send Y");
+    Serial.println(yAngleValue);
+
+    int joystickAngles[2] = {xAngleValue, yAngleValue};
+
     bool rslt;
-    rslt = radio.write(&dataToSend, sizeof(dataToSend));
+    rslt = radio.write(&joystickAngles, sizeof(joystickAngles));
     // Always use sizeof() as it gives the size as the number of bytes.
     // For example if dataToSend was an int sizeof() would correctly return 2
 
     Serial.print("Data Sent ");
-    Serial.print(dataToSend);
+    Serial.print(joystickAngles[0]);
+    Serial.print(joystickAngles[1]);
     if (rslt)
     {
         Serial.println("  Acknowledge received");
-        updateMessage();
     }
     else
     {
         Serial.println("  Tx failed");
     }
-}
-
-//================
-
-void updateMessage()
-{
-    // so you can see that new data is being sent
-    txNum += 1;
-    if (txNum > '9')
-    {
-        txNum = '0';
-    }
-    dataToSend[8] = txNum;
 }

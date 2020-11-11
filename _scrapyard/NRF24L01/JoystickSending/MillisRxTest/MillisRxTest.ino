@@ -12,6 +12,11 @@
 RF24 radio(48, 49); // CE, CSN
 const byte addresses[][6] = {"00001", "00002"};
 
+unsigned long lastRadioSwitch = 0;
+int radioMode = 0;
+
+int joystickAngles[2]; // for receive data
+
 void setup()
 {
     Serial.begin(115200);
@@ -26,11 +31,12 @@ void setup()
 
 void loop()
 {
-makeRadioLink();
+    radioLink();
 }
 
-void makeRadioLink() {
-      delay(5); // TODO: deal with (especially important on Rx side, no delays in car loop)
+void radioLink()
+{
+    delay(5); // TODO: deal with (especially important on Rx side, no delays in car loop)
 
     radio.startListening();
     if (radio.available())

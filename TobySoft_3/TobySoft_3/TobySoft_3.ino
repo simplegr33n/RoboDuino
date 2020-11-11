@@ -13,9 +13,9 @@ unsigned long lastUltrasonicTrigger = 0;
 volatile bool ultrasonicInterruptCalled = false;
 unsigned long ultrasonicResponseDurations[ultrasonicSensorQuantity];
 // Historical distance readings
-int D2_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-int D3_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-int D4_history[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int A13_History[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int A14_History[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int A15_History[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int ultrasonicHistoryPointer = 0; // Pointer for referencing position in history arrays
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,27 +38,24 @@ String DRIVE_INSTRUCTION;
 
 void setup()
 {
+  // Set up Serials
   Serial.begin(115200); // Serial0 - Main debug/USB serial
+  Serial2.begin(9600);  // Hardware Serial2 for DFPlayer -- seems to need 9600 baud
 
-  Serial2.begin(9600); // Hardware Serial2 for DFPlayer -- seems to need 9600 baud
-
+  // Initiate robot systems
+  initUltrasonicInterrupts(); // Must init Ultrasonic Interrupts before NRF24L01
   initIR_Remote();
-
+  initNRF24();
   initDFPLAYER();
-
   initOLED();
-
-  initUltrasonicInterrupts();
-
   initTOF10120();
-
   initAutoPilot();
 }
 
 void loop()
 {
-  // Check accelerometer for a collision
-  checkForCollision();
+  // Check for RF instructions
+  radioLink();
 
   // Check for IR remote signal
   checkIR_Remote();
@@ -73,11 +70,14 @@ void loop()
   }
 
   // Manage TOF10120
-  if ((lastTOFRead == 0) || (micros() - lastTOFRead > 20000))
+  if (micros() - lastTOFRead > 20000)
   {
     lastTOFRead = micros();
     readTOFDistance();
   }
+
+  // Check accelerometer for a collision
+  checkForCollision(); // TODO: could be done in autopilot
 
   // Auto-Pilot
   if (AUTOPILOT_ON)
@@ -87,9 +87,5 @@ void loop()
       lastPilotDecision = micros();
       autoNavigation();
     }
-  }
-  else
-  {
-    displaySleepScreen();
   }
 }

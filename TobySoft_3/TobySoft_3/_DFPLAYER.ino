@@ -37,8 +37,6 @@ void printDetail(uint8_t type, int value);
 
 void initDFPLAYER()
 {
-    Serial.println(F("DFPlayer Mini online."));
-
     if (!myDFPlayer.begin(Serial2))
     { //Use softwareSerial to communicate with mp3.
         while (true)

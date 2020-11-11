@@ -18,7 +18,7 @@ int returnAngles = 0;
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(115200);
 
     radio.begin();
     radio.openWritingPipe(addresses[1]);    // 00002

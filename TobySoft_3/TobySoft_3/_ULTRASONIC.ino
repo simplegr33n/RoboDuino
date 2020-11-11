@@ -99,9 +99,9 @@ void updateUltrasonicHistory()
     ultrasonicResponseDurations[2] = ultrasonicResponseEnds[2] - ultrasonicResponseStarts[2];
 
     // Update history entries
-    D2_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[0]);
-    D3_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[1]);
-    D4_history[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[2]);
+    A13_History[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[0]);
+    A14_History[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[1]);
+    A15_History[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[2]);
 
     // Update pointer
     ultrasonicHistoryPointer++;

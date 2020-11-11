@@ -64,6 +64,7 @@ void checkIR_Remote()
       {
         stopCar();
         AUTOPILOT_ON = false;
+        displayLogo();
       }
       else
       {
@@ -76,22 +77,27 @@ void checkIR_Remote()
     case FWD:
       forward();
       AUTOPILOT_ON = false;
+      displayLogo();
       break;
     case B:
       reverse();
       AUTOPILOT_ON = false;
+      displayLogo();
       break;
     case L:
       left();
       AUTOPILOT_ON = false;
+      displayLogo();
       break;
     case R:
       right();
       AUTOPILOT_ON = false;
+      displayLogo();
       break;
     case S:
       stopCar();
       AUTOPILOT_ON = false;
+      displayLogo();
       break;
     default:
       break;
