@@ -4,7 +4,17 @@
 
 Advanced TobySoft by a version to start integrating RF using NRF24L01 modules.
 
+## TobyTransmit 1.0
+
+Sketch for the remote manual control Arduino.
+
 ## Sensors and Equipment
+
+**Arduino Mega** - running an Atmega 2560. For the robot. Working towards half the pins used...
+
+**Arduino Mega** - running an Atmega 1280, for the remote manual controller. Overkill in size, will use something smaller in the future.
+
+**NRF24L01** (2x) - RF Transceiver modules. One for the robot and one for the remote manual control Arduino.
 
 **L298N** - Fairly general purpose small motor controller
 
