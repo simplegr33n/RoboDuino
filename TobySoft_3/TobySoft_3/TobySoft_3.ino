@@ -22,13 +22,16 @@ int ultrasonicHistoryPointer = 0; // Pointer for referencing position in history
 // For TOF10120                                                                                        //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 int tofReadDistance = 0;
-unsigned long lastTOFRead = 0; // micros() timestamp of last TOF10120 read
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For Auto-Pilot                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
 String DRIVE_INSTRUCTION;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// For NRF24L01                                                                                        //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+int radioJoystickAngles[2]; // for receive data
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -70,22 +73,15 @@ void loop()
   }
 
   // Manage TOF10120
-  if (micros() - lastTOFRead > 20000)
-  {
-    lastTOFRead = micros();
-    readTOFDistance();
-  }
-
-  // Check accelerometer for a collision
-  checkForCollision(); // TODO: could be done in autopilot
+  readTOFDistance();
 
   // Auto-Pilot
   if (AUTOPILOT_ON)
   {
-    if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 40000))
-    {
-      lastPilotDecision = micros();
-      autoNavigation();
-    }
+    autoNavigation();
+  }
+  else
+  {
+    manualControl();
   }
 }

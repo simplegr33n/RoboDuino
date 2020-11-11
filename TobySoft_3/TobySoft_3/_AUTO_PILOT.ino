@@ -6,6 +6,7 @@
 #define ENA 6
 #define carSpeed 160
 int middleDistance, leftDistance, rightDistance;
+unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
 bool handlingCollision = false;
 unsigned long collisionStart = 0;
 
@@ -32,40 +33,47 @@ void initAutoPilot()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void autoNavigation()
 {
+
+    checkForCollision(); // Check accelerometer for a collision
     if (handlingCollision)
     {
         handleCollisionEvent();
         return;
     }
 
-    int leftDistance = microsToCentimeters(ultrasonicResponseDurations[1]);
-    int middleDistance = microsToCentimeters(ultrasonicResponseDurations[0]);
-    if (tofReadDistance < middleDistance) // ensure the more proximate value is used
+    if ((lastPilotDecision == 0) || (micros() - lastPilotDecision > 40000))
     {
-        middleDistance = tofReadDistance;
-    }
-    int rightDistance = microsToCentimeters(ultrasonicResponseDurations[2]);
+        lastPilotDecision = micros();
 
-    if ((middleDistance < 30) || (leftDistance < 25) || (rightDistance < 25))
-    {
-        stopCar();
+        int leftDistance = microsToCentimeters(ultrasonicResponseDurations[1]);
+        int middleDistance = microsToCentimeters(ultrasonicResponseDurations[0]);
+        if (tofReadDistance < middleDistance) // ensure the more proximate value is used
+        {
+            middleDistance = tofReadDistance;
+        }
+        int rightDistance = microsToCentimeters(ultrasonicResponseDurations[2]);
 
-        if ((rightDistance < 20) && (leftDistance < 20))
+        if ((middleDistance < 30) || (leftDistance < 25) || (rightDistance < 25))
         {
-            reverse();
+            stopCar();
+
+            if ((rightDistance < 20) && (leftDistance < 20))
+            {
+                reverse();
+            }
+            else if (rightDistance > 20)
+            {
+                right();
+            }
+            else if (rightDistance < 20)
+            {
+                left();
+            }
         }
-        else if (rightDistance > 20)
+        else
         {
-            right();
+            forward();
         }
-        else if (rightDistance < 20)
-        {
-            left();
-        }
-    }
-    else
-    {
-        forward();
     }
 }
 
@@ -107,6 +115,60 @@ void handleCollisionEvent()
     {
         handlingCollision = false;
         collisionStart = 0;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Manual Functions                                                                                    //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void manualControl()
+{
+    if ((radioJoystickAngles[0] < 100) && (radioJoystickAngles[0] > 80) && (radioJoystickAngles[1] < 100) && (radioJoystickAngles[1] > 80))
+    {
+        stopCar();
+        return;
+    }
+
+    xDiff = 0;
+    if (radioJoystickAngles[0] < 90)
+    {
+        xDiff = 90 - radioJoystickAngles[0];
+    }
+    else
+    {
+        xDiff = radioJoystickAngles[0] - 90;
+    }
+    yDiff = 0;
+    if (radioJoystickAngles[1] < 90)
+    {
+        yDiff = 90 - radioJoystickAngles[1];
+    }
+    else
+    {
+        yDiff = radioJoystickAngles[1] - 90;
+    }
+
+    if (xDiff >= yDiff) // turning takes precedence
+    {
+        if (radioJoystickAngles[0] < 90)
+        {
+            left();
+        }
+        else
+        {
+            right();
+        }
+    }
+    else
+    {
+        if (radioJoystickAngles[1] < 90)
+        {
+            forward();
+        }
+        else
+        {
+            reverse();
+        }
     }
 }
 

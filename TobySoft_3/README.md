@@ -20,8 +20,8 @@ Advanced TobySoft by a version to start integrating RF using NRF24L01 modules.
 
 ## Uno Pinout
 
-| Pin              | _sensor_           | _sensor pin_ | _notes_                             |
-| ---------------- | ------------------ | ------------ | ----------------------------------- |
+| Pin              | _sensor_           | _sensor pin_ | _notes_                                  |
+| ---------------- | ------------------ | ------------ | ---------------------------------------- |
 | **_A0_**         |                    |              |
 | **_A1_**         | Accelerometer      | _X-Axis_     |
 | **_A2_**         |                    |              |
@@ -35,9 +35,9 @@ Advanced TobySoft by a version to start integrating RF using NRF24L01 modules.
 | **_A10_**        |                    |              |
 | **_A11_**        |                    |              |
 | **_A12_**        |                    |              |
-| **_A13_**        | HC-SR04 (F-Center) | _Echo_       | utilizing PCINT21                   |
-| **_A14_**        | HC-SR04 (F-Left)   | _Echo_       | utilizing PCINT22                   |
-| **_A15_**        | HC-SR04 (F-Right)  | _Echo_       | utilizing PCINT23                   |
+| **_A13_**        | HC-SR04 (F-Center) | _Echo_       | utilizing PCINT21                        |
+| **_A14_**        | HC-SR04 (F-Left)   | _Echo_       | utilizing PCINT22                        |
+| **_A15_**        | HC-SR04 (F-Right)  | _Echo_       | utilizing PCINT23                        |
 | **_D0_** _RX0_   |                    |              |
 | **_D1_** _TX0_   |                    |              |
 | **_D2_**         |                    |              |
@@ -48,14 +48,14 @@ Advanced TobySoft by a version to start integrating RF using NRF24L01 modules.
 | **_D7_**         | L298N              |              |
 | **_D8_**         | L298N              |              |
 | **_D9_**         | L298N              |              |
-| **_D10_**        | SR04 Trigger       | _Trig_       | single trigger pin for all SR04s    |
+| **_D10_**        | SR04 Trigger       | _Trig_       | single trigger pin for all SR04s         |
 | **_D11_**        | L298N              |              |
 | **_D12_**        | IR Receiver        | _Out_        |
 | **_D13_**        |                    |              |
-| **_D14_** _TX3_  |                    |              | USB COM Port                        |
-| **_D15_** _RX3_  |                    |              | USB COM Port                        |
-| **_D16_** _TX2_  | DFR0299            | _RX_         | \*9600 baud - 1k resistor for noise |
-| **_D17_** _RX2_  | DFR0299            | _TX_         | \*9600 baud                         |
+| **_D14_** _TX3_  |                    |              | USB COM Port                             |
+| **_D15_** _RX3_  |                    |              | USB COM Port                             |
+| **_D16_** _TX2_  | DFR0299            | _RX_         | \*9600 baud - 1k resistor for noise      |
+| **_D17_** _RX2_  | DFR0299            | _TX_         | \*9600 baud                              |
 | **_D18_** _TX1_  |                    |              |
 | **_D19_** _RX1_  |                    |              |
 | **_D20_** _II2C_ | OLED (SSD1306)     | _SDA_        |
@@ -88,9 +88,9 @@ Advanced TobySoft by a version to start integrating RF using NRF24L01 modules.
 | **_D45_**        |                    |              |
 | **_D46_**        |                    |              |
 | **_D47_**        |                    |              |
-| **_D48_**        |                    |              |
-| **_D49_**        |                    |              |
-| **_D50_**        |                    |              |
-| **_D51_**        |                    |              |
-| **_D52_**        |                    |              |
+| **_D48_**        | NRF24L01           | _CE_         | \*1000µF capacitor over sensor VCC + GnD |
+| **_D49_**        | NRF24L01           | _CSN_        |
+| **_D50_** _MISO_ | NRF24L01           | _MISO_       |
+| **_D51_** _MOSI_ | NRF24L01           | _MOSI_       |
+| **_D52_** _SCK_  | NRF24L01           | _SCK_        |
 | **_D53_**        |                    |              |

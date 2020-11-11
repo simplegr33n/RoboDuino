@@ -26,30 +26,31 @@ void setup()
 
 void loop()
 {
-makeRadioLink();
+    makeRadioLink();
 }
 
-void makeRadioLink() {
-      delay(5); // TODO: deal with (especially important on Rx side, no delays in car loop)
+void makeRadioLink()
+{
+    delay(5); // TODO: deal with (especially important on Rx side, no delays in car loop)
 
     radio.startListening();
     if (radio.available())
     {
-        int joystickAngles[2];
+        int radioJoystickAngles[2];
 
         while (radio.available())
         {
-            radio.read(&joystickAngles, sizeof(joystickAngles));
+            radio.read(&radioJoystickAngles, sizeof(radioJoystickAngles));
 
             Serial.println("joystickAngles");
-            Serial.println(joystickAngles[0]);
-            Serial.println(joystickAngles[1]);
+            Serial.println(radioJoystickAngles[0]);
+            Serial.println(radioJoystickAngles[1]);
         }
 
         delay(5); // TODO: deal with (especially important on Rx side, no delays in car loop)
 
         radio.stopListening();
 
-        radio.write(&joystickAngles, sizeof(joystickAngles));
+        radio.write(&radioJoystickAngles, sizeof(radioJoystickAngles));
     }
 }

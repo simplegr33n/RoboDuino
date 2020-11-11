@@ -17,8 +17,6 @@ RF24 radio(CE_PIN, CSN_PIN);
 
 unsigned long lastRadioLink = 0;
 
-int joystickAngles[2]; // for receive data
-
 void initNRF24()
 {
     radio.begin();
@@ -31,18 +29,17 @@ void initNRF24()
 
 void radioLink()
 {
-    cli();
     if (micros() - lastRadioLink > 5000)
     {
         lastRadioLink = micros();
+        cli();
         if (radio.available())
         {
-
-            radio.read(&joystickAngles, sizeof(joystickAngles));
+            radio.read(&radioJoystickAngles, sizeof(radioJoystickAngles));
             Serial.println("joystickAngles");
-            Serial.println(joystickAngles[0]);
-            Serial.println(joystickAngles[1]);
+            Serial.println(radioJoystickAngles[0]);
+            Serial.println(radioJoystickAngles[1]);
         }
+        sei();
     }
-    sei();
 }

@@ -16,12 +16,12 @@ const byte thisSlaveAddress[5] = {'R', 'x', 'A', 'A', 'A'};
 
 RF24 radio(CE_PIN, CSN_PIN);
 
-int joystickAngles[2]; // for receive data
+int radioJoystickAngles[2]; // for receive data
 
 void setup()
 {
     Serial.begin(9600);
-  
+
     radio.begin();
     radio.setDataRate(RF24_250KBPS);
     radio.openReadingPipe(1, thisSlaveAddress);
@@ -39,9 +39,9 @@ void radioLink()
 {
     if (radio.available())
     {
-        radio.read(&joystickAngles, sizeof(joystickAngles));
+        radio.read(&radioJoystickAngles, sizeof(radioJoystickAngles));
         Serial.println("joystickAngles");
-        Serial.println(joystickAngles[0]);
-        Serial.println(joystickAngles[1]);
+        Serial.println(radioJoystickAngles[0]);
+        Serial.println(radioJoystickAngles[1]);
     }
 }

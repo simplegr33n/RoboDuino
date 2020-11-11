@@ -18,6 +18,8 @@ unsigned short lenth_val = 0;
 unsigned char i2c_rx_buf[16];
 unsigned char dirsend_flag = 0;
 
+unsigned long lastTOFRead = 0; // micros() timestamp of last TOF10120 read
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
 // END GLOBAL VARS                                                                                     //
@@ -55,10 +57,15 @@ void TOFSensorRead(unsigned char addr, unsigned char *datbuf, unsigned char cnt)
 
 void readTOFDistance()
 {
-    TOFSensorRead(0x00, i2c_rx_buf, 2);
-    lenth_val = i2c_rx_buf[0];
-    lenth_val = lenth_val << 8;
-    lenth_val |= i2c_rx_buf[1];
+    if (micros() - lastTOFRead > 20000)
+    {
+        lastTOFRead = micros();
 
-    tofReadDistance = (int)lenth_val / 10; // get centimeter value to harmonize with ultrasonics
+        TOFSensorRead(0x00, i2c_rx_buf, 2);
+        lenth_val = i2c_rx_buf[0];
+        lenth_val = lenth_val << 8;
+        lenth_val |= i2c_rx_buf[1];
+
+        tofReadDistance = (int)lenth_val / 10; // get centimeter value to harmonize with ultrasonics
+    }
 }

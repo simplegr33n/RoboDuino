@@ -42,9 +42,9 @@ void loop()
     Serial.println("Send Y");
     Serial.println(yAngleValue);
 
-    int joystickAngles[2] = {xAngleValue, yAngleValue};
+    int radioJoystickAngles[2] = {xAngleValue, yAngleValue};
 
-    radio.write(&joystickAngles, sizeof(joystickAngles));
+    radio.write(&radioJoystickAngles, sizeof(radioJoystickAngles));
 
     delay(5); // TODO: deal with (though not the hugest issue in a dedicated transmitter)
 
