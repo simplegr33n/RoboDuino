@@ -129,7 +129,7 @@ void manualControl()
         return;
     }
 
-    xDiff = 0;
+    int xDiff = 0;
     if (radioJoystickAngles[0] < 90)
     {
         xDiff = 90 - radioJoystickAngles[0];
@@ -138,7 +138,7 @@ void manualControl()
     {
         xDiff = radioJoystickAngles[0] - 90;
     }
-    yDiff = 0;
+    int yDiff = 0;
     if (radioJoystickAngles[1] < 90)
     {
         yDiff = 90 - radioJoystickAngles[1];
