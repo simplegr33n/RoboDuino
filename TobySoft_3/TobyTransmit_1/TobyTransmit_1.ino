@@ -3,8 +3,14 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
+// NRF24L01
 #define CE_PIN 7
 #define CSN_PIN 8
+
+// Joystick
+#define X_PIN A0
+#define Y_PIN A1
+#define SW_Pin 2
 
 const byte slaveAddress[5] = {'R', 'x', 'A', 'A', 'A'};
 
@@ -45,15 +51,19 @@ void loop()
 void send()
 {
 
-    int xPotValue = analogRead(A0);
+    int xPotValue = analogRead(X_PIN);
     int xAngleValue = map(xPotValue, 0, 1023, 0, 180);
-    int yPotValue = analogRead(A1);
+    int yPotValue = analogRead(Y_PIN);
     int yAngleValue = map(yPotValue, 0, 1023, 0, 180);
 
-    Serial.println("Send X");
-    Serial.println(xAngleValue);
-    Serial.println("Send Y");
-    Serial.println(yAngleValue);
+    // // DEBUG
+    //     Serial.println("Send X");
+    //     Serial.println(xAngleValue);
+    //     Serial.println("Send Y");
+    //     Serial.println(yAngleValue);
+
+    Serial.print("SW!!: ");
+    Serial.println(digitalRead(SW_Pin));
 
     int radioJoystickAngles[2] = {xAngleValue, yAngleValue};
 
@@ -62,9 +72,11 @@ void send()
     // Always use sizeof() as it gives the size as the number of bytes.
     // For example if dataToSend was an int sizeof() would correctly return 2
 
-    Serial.print("Data Sent ");
+    Serial.print("Data Sent (");
     Serial.print(radioJoystickAngles[0]);
+    Serial.print(",");
     Serial.print(radioJoystickAngles[1]);
+    Serial.println(")");
     if (rslt)
     {
         Serial.println("  Acknowledge received");
