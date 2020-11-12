@@ -1,9 +1,4 @@
-/*
-* NRF24L01 Joystick
-*   Receiver Code
-* 
-* Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
-*/
+// TobyRecieve
 
 #include <SPI.h>
 #include <nRF24L01.h>
@@ -11,53 +6,74 @@
 
 #define CE_PIN 48
 #define CSN_PIN 49
+
 const byte thisSlaveAddress[5] = {'R', 'x', 'A', 'A', 'A'};
 
 RF24 radio(CE_PIN, CSN_PIN);
 
-unsigned long lastRadioLink = 0;
-
-unsigned long lastSuccessfulRadioRead = 0;
+int receiveData[3];         // this must match transmitData in the RF Transmitter
+int ackData[3] = {0, 0, 0}; // the values to be sent to the RF Transmitter, init 0 for now
+bool newData = false;
 
 void initNRF24()
 {
+    Serial.println("TobySoft RF Transmit Link initiating");
     radio.begin();
     radio.setDataRate(RF24_250KBPS);
     radio.openReadingPipe(1, thisSlaveAddress);
+
+    radio.enableAckPayload();
+
     radio.startListening();
 
-    Serial.println(F("NRF24 online."));
+    radio.writeAckPayload(1, &ackData, sizeof(ackData)); // pre-load data
 }
 
 void radioLink()
 {
-    if (micros() - lastRadioLink > 5000)
+    getData();
+    showData();
+}
+
+//============
+void getData()
+{
+    if (radio.available())
     {
-        lastRadioLink = micros();
-        cli();
-        if (radio.available())
-        {
-            lastSuccessfulRadioRead = micros();
-            radio.read(&radioJoystickAngles, sizeof(radioJoystickAngles));
-
-            // DEBUG
-            Serial.print("joystickAngles (");
-            Serial.print(radioJoystickAngles[0]);
-            Serial.print(", ");
-            Serial.print(radioJoystickAngles[1]);
-            Serial.println(")");
-        }
-        else
-        {
-            if (micros() - lastSuccessfulRadioRead > 1000000) // if longer than 1 second, set disconnected values
-            {                                                 // TODO: could probably be reduced
-                radioJoystickAngles[0] = -1;
-                radioJoystickAngles[1] = -1;
-
-                // DEBUG
-                Serial.println("No RF Connection");
-            }
-        }
-        sei();
+        radio.read(&receiveData, sizeof(receiveData));
+        updateReplyData();
+        newData = true;
     }
+}
+
+//================
+void showData()
+{
+    if (newData == true)
+    {
+        Serial.print("Data received (");
+        Serial.print(receiveData[0]);
+        Serial.print(", ");
+        Serial.print(receiveData[1]);
+        Serial.print(", ");
+        Serial.print(receiveData[2]);
+        Serial.print(")");
+        Serial.print(" ackPayload sent ");
+        Serial.print(ackData[0]);
+        Serial.print(", ");
+        Serial.print(ackData[1]);
+        Serial.print(", ");
+        Serial.println(ackData[2]);
+        newData = false;
+    }
+}
+
+//================
+void updateReplyData()
+{
+    ackData[0] = tofReadDistance;                                     // most accurate front
+    ackData[1] = microsToCentimeters(ultrasonicResponseDurations[1]); // left
+    ackData[2] = microsToCentimeters(ultrasonicResponseDurations[2]); // right
+
+    radio.writeAckPayload(1, &ackData, sizeof(ackData)); // load the payload for the next time
 }
