@@ -10,10 +10,7 @@ float collisionThresholdTurn = 1.35;
 
 void checkForCollision()
 {
-    if (AUTOPILOT_ON == false) {
-      return;
-    }
-  
+
     if ((DRIVE_INSTRUCTION == "STOP") || (DRIVE_INSTRUCTION == "REVERSE"))
     {
         return; // Ignore accelerometer
