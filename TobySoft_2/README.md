@@ -12,7 +12,7 @@ Arduino Mega based self driving car. Now with more crunchies.
 
 **TOF10120** - Front facing IR time of flight distance sensor
 
-**ADLX335** - Triple Axis Accelerometer _(actually not being utilized as of last verison of TobySoft 1.0)_
+**ADLX335** - Triple Axis Accelerometer _(currently only using x-axis, for collision detection)_
 
 **SSD1306** - 128x64 OLED screen
 

@@ -17,6 +17,8 @@ RF24 radio(CE_PIN, CSN_PIN);
 
 unsigned long lastRadioLink = 0;
 
+unsigned long lastSuccessfulRadioRead = 0;
+
 void initNRF24()
 {
     radio.begin();
@@ -35,10 +37,26 @@ void radioLink()
         cli();
         if (radio.available())
         {
+            lastSuccessfulRadioRead = micros();
             radio.read(&radioJoystickAngles, sizeof(radioJoystickAngles));
-            Serial.println("joystickAngles");
-            Serial.println(radioJoystickAngles[0]);
-            Serial.println(radioJoystickAngles[1]);
+
+            // DEBUG
+            Serial.print("joystickAngles (");
+            Serial.print(radioJoystickAngles[0]);
+            Serial.print(", ");
+            Serial.print(radioJoystickAngles[1]);
+            Serial.println(")");
+        }
+        else
+        {
+            if (micros() - lastSuccessfulRadioRead > 1000000) // if longer than 1 second, set disconnected values
+            {                                                 // TODO: could probably be reduced
+                radioJoystickAngles[0] = -1;
+                radioJoystickAngles[1] = -1;
+
+                // DEBUG
+                Serial.println("No RF Connection");
+            }
         }
         sei();
     }

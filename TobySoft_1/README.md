@@ -14,7 +14,7 @@ Beyond having 4 hardware Serial ports to the Uno's 1, other advantages to the Me
 
 **TOF10120** - Front facing IR time of flight distance sensor
 
-**ADLX335** - Triple Axis Accelerometer _(actually not being utilized as of last verison of TobySoft 1.0)_
+**ADLX335** - Triple Axis Accelerometer _(hooked up, but not utilized in TobySoft 1.0)_
 
 **SSD1306** - 128x64 OLED screen
 

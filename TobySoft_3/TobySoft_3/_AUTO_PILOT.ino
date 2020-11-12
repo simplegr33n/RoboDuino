@@ -129,6 +129,12 @@ void manualControl()
         return;
     }
 
+    if ((radioJoystickAngles[0] == -1) && (radioJoystickAngles[1] == -1))
+    {
+        stopCar();
+        return;
+    }
+
     int xDiff = 0;
     if (radioJoystickAngles[0] < 90)
     {

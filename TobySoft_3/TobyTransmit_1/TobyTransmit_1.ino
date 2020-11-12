@@ -18,7 +18,7 @@ unsigned long txIntervalMillis = 250; // send four times per second
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(115200);
 
     Serial.println("TobySoft Transmitter Starting");
 
