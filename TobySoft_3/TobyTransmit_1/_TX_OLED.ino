@@ -101,9 +101,6 @@ void displayRxData(void)
 {
     if (ackData[0] != -1)
     {
-        // Clear graph area for update
-        display.fillRect(0, 16, 128, 48, SSD1306_BLACK);
-
         // L / R text
         display.setTextSize(2); // 3:1 pixel scale
         display.setTextColor(SSD1306_WHITE);
@@ -121,12 +118,9 @@ void displayRxData(void)
     }
     else
     {
-        // Clear graph area for update
-        display.fillRect(0, 16, 128, 48, SSD1306_WHITE);
-
         // L / R text
-        display.setTextSize(3); // 3:1 pixel scale
-        display.setTextColor(SSD1306_BLACK);
+        display.setTextSize(3.5); // 3:1 pixel scale
+        display.setTextColor(SSD1306_WHITE);
 
         display.setCursor(6, 30);
         display.println("N/C!");

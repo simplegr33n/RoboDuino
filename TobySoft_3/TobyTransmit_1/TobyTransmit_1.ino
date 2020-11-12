@@ -21,20 +21,26 @@ int transmitData[3];
 int ackData[3] = {-1, -1, -1}; // to hold the three values coming from the robot
 bool newData = false;
 
-unsigned long currentMillis;
-unsigned long prevMillis;
-unsigned long txIntervalMillis = 300; // send every 3/10th of a second
+unsigned long prevMillis = 0;
+unsigned long txIntervalMillis = 100; // send every 1/4th of a second
 
 int xAngleValue;
 int yAngleValue;
 int SW_PinRead;
 
-//===============
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ///////////////                                                                                     //
+// END GLOBAL VARS                                                                                     //
+// ///////////////                                                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup()
 {
 
     Serial.begin(115200);
+
+    initOLED(); // init display
+
     Serial.println("TobyTransmit initiating...");
 
     // Set up pin for joystick switch function
@@ -49,23 +55,21 @@ void setup()
     radio.setRetries(5, 5); // delay, count
                             // 5 gives a 1500 µsec delay which is needed for a 32 byte ackPayload
     radio.openWritingPipe(slaveAddress);
-
-    initOLED(); // init display
 }
-
-//=============
 
 void loop()
 {
-    currentMillis = millis();
-    if (currentMillis - prevMillis >= txIntervalMillis)
+    if (millis() - prevMillis > txIntervalMillis)
     {
+        prevMillis = millis();
         sendToToby();
         updateDisplay(); // update OLED
     }
 }
 
-//================
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Transmit Functions                                                                                  //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void sendToToby()
 {
@@ -109,6 +113,4 @@ void sendToToby()
         ackData[2] = -1;
         Serial.println("  Tx failed");
     }
-
-    prevMillis = millis();
 }
