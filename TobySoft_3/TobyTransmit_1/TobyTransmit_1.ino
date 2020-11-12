@@ -18,12 +18,16 @@ const byte slaveAddress[5] = {'R', 'x', 'A', 'A', 'A'};
 RF24 radio(CE_PIN, CSN_PIN); // Create a Radio
 
 int transmitData[3];
-int ackData[3] = {-1, -1, -1}; // to hold the two values coming from the slave
+int ackData[3] = {-1, -1, -1}; // to hold the three values coming from the robot
 bool newData = false;
 
 unsigned long currentMillis;
 unsigned long prevMillis;
-unsigned long txIntervalMillis = 250; // send four times per second
+unsigned long txIntervalMillis = 300; // send every 3/10th of a second
+
+int xAngleValue;
+int yAngleValue;
+int SW_PinRead;
 
 //===============
 
@@ -31,7 +35,7 @@ void setup()
 {
 
     Serial.begin(115200);
-    Serial.println("SimpleTxAckPayload Starting");
+    Serial.println("TobyTransmit initiating...");
 
     // Set up pin for joystick switch function
     pinMode(SW_Pin, INPUT);
@@ -45,29 +49,32 @@ void setup()
     radio.setRetries(5, 5); // delay, count
                             // 5 gives a 1500 µsec delay which is needed for a 32 byte ackPayload
     radio.openWritingPipe(slaveAddress);
+
+    initOLED(); // init display
 }
 
 //=============
 
 void loop()
 {
-
     currentMillis = millis();
     if (currentMillis - prevMillis >= txIntervalMillis)
     {
-        send();
+        sendToToby();
+        updateDisplay(); // update OLED
     }
-    showData();
 }
 
 //================
 
-void send()
+void sendToToby()
 {
     int xPotValue = analogRead(X_PIN);
-    int xAngleValue = map(xPotValue, 0, 1023, 0, 180);
+    xAngleValue = map(xPotValue, 0, 1023, 0, 180);
     int yPotValue = analogRead(Y_PIN);
-    int yAngleValue = map(yPotValue, 0, 1023, 0, 180);
+    yAngleValue = map(yPotValue, 0, 1023, 0, 180);
+
+    SW_PinRead = digitalRead(SW_Pin);
 
     int transmitData[3] = {xAngleValue, yAngleValue, digitalRead(SW_Pin)};
 
@@ -97,25 +104,11 @@ void send()
     }
     else
     {
+        ackData[0] = -1; // set disconnected values
+        ackData[1] = -1;
+        ackData[2] = -1;
         Serial.println("  Tx failed");
     }
 
     prevMillis = millis();
-}
-
-//=================
-
-void showData()
-{
-    if (newData == true)
-    {
-        Serial.print("  Acknowledge data ");
-        Serial.print(ackData[0]);
-        Serial.print(", ");
-        Serial.print(ackData[0]);
-        Serial.print(", ");
-        Serial.println(ackData[2]);
-        Serial.println();
-        newData = false;
-    }
 }

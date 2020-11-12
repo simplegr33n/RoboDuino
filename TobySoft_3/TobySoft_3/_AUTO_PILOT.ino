@@ -10,6 +10,8 @@ unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDeci
 bool handlingCollision = false;
 unsigned long collisionStart = 0;
 
+unsigned long lastControlSwitch = 0; // for RF joystick
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
 // END GLOBAL VARS                                                                                     //
@@ -33,6 +35,15 @@ void initAutoPilot()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void autoNavigation()
 {
+
+    if ((dataFromTransmitter[2] == 0) && (micros() - lastControlSwitch > 500000)) // check RF switch for control change
+    {
+        lastControlSwitch = micros();
+        stopCar();
+        displayLogo();
+        AUTOPILOT_ON = false;
+        return;
+    }
 
     checkForCollision(); // Check accelerometer for a collision
     if (handlingCollision)
@@ -123,40 +134,50 @@ void handleCollisionEvent()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void manualControl()
 {
-    if ((radioJoystickAngles[0] < 100) && (radioJoystickAngles[0] > 80) && (radioJoystickAngles[1] < 100) && (radioJoystickAngles[1] > 80))
+
+    if ((dataFromTransmitter[2] == 0) && (micros() - lastControlSwitch > 500000)) // check RF switch for control change
+    {
+        lastControlSwitch = micros();
+        stopCar();
+        AUTOPILOT_ON = true;
+        displayUltrasonicHeader();
+        return;
+    }
+
+    if ((dataFromTransmitter[0] < 100) && (dataFromTransmitter[0] > 80) && (dataFromTransmitter[1] < 100) && (dataFromTransmitter[1] > 80))
     {
         stopCar();
         return;
     }
 
-    if ((radioJoystickAngles[0] == -1) && (radioJoystickAngles[1] == -1))
+    if ((dataFromTransmitter[0] == -1) && (dataFromTransmitter[1] == -1))
     {
         stopCar();
         return;
     }
 
     int xDiff = 0;
-    if (radioJoystickAngles[0] < 90)
+    if (dataFromTransmitter[0] < 90)
     {
-        xDiff = 90 - radioJoystickAngles[0];
+        xDiff = 90 - dataFromTransmitter[0];
     }
     else
     {
-        xDiff = radioJoystickAngles[0] - 90;
+        xDiff = dataFromTransmitter[0] - 90;
     }
     int yDiff = 0;
-    if (radioJoystickAngles[1] < 90)
+    if (dataFromTransmitter[1] < 90)
     {
-        yDiff = 90 - radioJoystickAngles[1];
+        yDiff = 90 - dataFromTransmitter[1];
     }
     else
     {
-        yDiff = radioJoystickAngles[1] - 90;
+        yDiff = dataFromTransmitter[1] - 90;
     }
 
     if (xDiff >= yDiff) // turning takes precedence
     {
-        if (radioJoystickAngles[0] < 90)
+        if (dataFromTransmitter[0] < 90)
         {
             left();
         }
@@ -167,7 +188,7 @@ void manualControl()
     }
     else
     {
-        if (radioJoystickAngles[1] < 90)
+        if (dataFromTransmitter[1] < 90)
         {
             forward();
         }
