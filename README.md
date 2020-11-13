@@ -2,6 +2,12 @@
 
 _Adventures in Arduino controlled robotics_
 
+## TobySoft 4.0
+
+For the Arduino Mega. More sophisticated radio control goals than 3.0. And, armor (Toby Fur).
+
+[<img src="https://raw.githubusercontent.com/simplegr33n/RoboDuino/master/_assets/TS4.bmp" width="400">](https://github.com/simplegr33n/RoboDuino/tree/master/TobySoft_4)
+
 ## TobySoft 3.0
 
 For the Arduino Mega. Incorporating RF control.
