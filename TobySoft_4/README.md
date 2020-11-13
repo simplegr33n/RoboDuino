@@ -4,11 +4,15 @@
 
 Advanced TobySoft by a version to better detail printed armor and accessories. Also intending with this version to enhance radio capabilities, and start prototyping a universal controller.
 
-## TobyTransmit 1.0
+## TobyTransmit 2.0
 
 Sketch for the remote manual control Arduino.
 
-## Sensors and Equipment
+## Toby Fur 1.0
+
+**Face Armor** - Faceplate armor which allows positioning of a number of sensors while helping protect the Arduino, wiring, and TobyBot as a whole.
+
+## Sensors and Electronics
 
 **Arduino Mega** - running an Atmega 2560. For the robot. Working towards half the pins used...
 
@@ -27,10 +31,6 @@ Sketch for the remote manual control Arduino.
 **SSD1306** - 128x64 OLED screen
 
 **DFR0299** - DFPlayer Mini, a nifty little MP3 playing microcontroller _(and a small speaker for video game tunes)_
-
-## Printed Parts
-
-**Toby Fur 1.0 Face Armor** - Faceplate armor which allows positioning of a number of sensors while helping protect the Arduino, wiring, and TobyBot as a whole.
 
 ## Uno Pinout
 
