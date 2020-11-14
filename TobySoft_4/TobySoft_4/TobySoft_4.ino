@@ -24,6 +24,11 @@ int ultrasonicHistoryPointer = 0; // Pointer for referencing position in history
 int tofReadDistance = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IR Proximity                                                                                        //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+int irProxValue = 0;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For Auto-Pilot                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 String DRIVE_INSTRUCTION;
@@ -52,6 +57,7 @@ void setup()
   initDFPLAYER();
   initOLED();
   initTOF10120();
+  initIRProx();
   initAutoPilot();
 }
 
@@ -74,6 +80,9 @@ void loop()
 
   // Manage TOF10120
   readTOFDistance();
+
+  // Check IR Proximity sensors
+  checkIRProx();
 
   // Auto-Pilot
   if (AUTOPILOT_ON)

@@ -26,6 +26,8 @@ Sketch for the remote manual control Arduino.
 
 **TOF10120** - Front facing IR time of flight distance sensor
 
+**IR Proximity Sensor** - Simple and cheap digital obstacle detector
+
 **ADLX335** - Triple Axis Accelerometer _(currently only using x-axis, for collision detection)_
 
 **SSD1306** - 128x64 OLED screen
@@ -100,7 +102,7 @@ Sketch for the remote manual control Arduino.
 | **_D43_**        |                    |              |
 | **_D44_**        |                    |              |
 | **_D45_**        |                    |              |
-| **_D46_**        |                    |              |
+| **_D46_**        | Front IR-Proximity | _Out_        | 3 sensors chained into one input pin     |
 | **_D47_**        |                    |              |
 | **_D48_**        | NRF24L01           | _CE_         | \*1000µF capacitor over sensor VCC + GnD |
 | **_D49_**        | NRF24L01           | _CSN_        |

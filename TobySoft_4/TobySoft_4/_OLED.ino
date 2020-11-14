@@ -60,7 +60,7 @@ void displayInitSequence(void)
         TSb_BMP, 128, 64, 1);
 
     display.display();
-    delay(1000); // show for 1 seconds
+    delay(1000);
 
     display.clearDisplay();
     // Draw TobySoft 1.0 bootscreen
@@ -70,7 +70,7 @@ void displayInitSequence(void)
         TS1_BMP, 128, 64, 1);
 
     display.display();
-    delay(1000); // show for 1 seconds
+    delay(1000);
 
     display.clearDisplay();
     // Draw TobySoft 2.0 bootscreen
@@ -80,7 +80,7 @@ void displayInitSequence(void)
         TS2_BMP, 128, 64, 1);
 
     display.display();
-    delay(1000); // show for 1 seconds
+    delay(1000);
 
     display.clearDisplay();
     // Draw TobySoft 3.0 bootscreen
@@ -90,7 +90,17 @@ void displayInitSequence(void)
         TS3_BMP, 128, 64, 1);
 
     display.display();
-    delay(1000); // show for 1 seconds
+    delay(1000);
+
+    display.clearDisplay();
+    // Draw TobySoft 4.0 bootscreen
+    display.drawBitmap(
+        0,
+        0,
+        TS4_BMP, 128, 64, 1);
+
+    display.display();
+    delay(2000);
 }
 
 void displayUltrasonicHeader(void)
@@ -176,7 +186,7 @@ void displayLogo()
     display.drawBitmap(
         0,
         0,
-        TS3_BMP, 128, 64, 1);
+        TS4_BMP, 128, 64, 1);
 
     display.display();
 }

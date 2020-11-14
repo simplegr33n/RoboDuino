@@ -31,7 +31,7 @@ void initAutoPilot()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Auto-Pilot Functions                                                                                //
+// Auto-Pilot functions                                                                                //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void autoNavigation()
 {
@@ -61,6 +61,10 @@ void autoNavigation()
         if (tofReadDistance < middleDistance) // ensure the more proximate value is used
         {
             middleDistance = tofReadDistance;
+        }
+        if (irProxValue == 0)
+        {
+            middleDistance = 1;
         }
         int rightDistance = microsToCentimeters(ultrasonicResponseDurations[2]);
 
@@ -130,7 +134,7 @@ void handleCollisionEvent()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Manual Functions                                                                                    //
+// Manual functions                                                                                    //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void manualControl()
 {
@@ -200,7 +204,7 @@ void manualControl()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Motor Driving Functions                                                                             //
+// Motor Driving functions                                                                             //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void forward()
 {

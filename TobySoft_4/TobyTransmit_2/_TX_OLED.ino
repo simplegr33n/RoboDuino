@@ -56,7 +56,7 @@ void displayInitSequence(void)
     display.drawBitmap(
         0,
         0,
-        TS3_BMP, 128, 64, 1);
+        TS4_BMP, 128, 64, 1);
 
     display.display();
     delay(1000); // show for 1 seconds
