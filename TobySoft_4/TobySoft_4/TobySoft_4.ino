@@ -11,7 +11,10 @@ bool MUSIC_ON = false;
 #define ULTRASONIC_INTERVAL 20000  // needs some tuning (30000 perhaps minimum)
 unsigned long lastUltrasonicTrigger = 0;
 volatile bool ultrasonicInterruptCalled = false;
-unsigned long ultrasonicResponseDurations[ultrasonicSensorQuantity]; // TODO: store centimeters here, smaller value easily sent
+
+// unsigned long ultrasonicResponseDurations[ultrasonicSensorQuantity];
+
+int ultrasonicDistances[ultrasonicSensorQuantity]; // array of most recent ultrasonic distance reads
 // Historical distance readings
 int A13_History[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int A14_History[8] = {0, 0, 0, 0, 0, 0, 0, 0};

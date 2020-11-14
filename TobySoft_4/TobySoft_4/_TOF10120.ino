@@ -1,14 +1,3 @@
-/*
-  TOF10120 Distance Sensor
-
-   ##II2C connection
-     # BLUE wire - A4
-     # GREEN wire - A5
-
-  Adapted from code from DroneBot Workshop 2019
-  https://dronebotworkshop.com
-*/
-
 #include <Wire.h>
 
 unsigned char ok_flag;

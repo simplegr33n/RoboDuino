@@ -90,18 +90,23 @@ void resolveUltrasonicInterrupt()
 void updateUltrasonicHistory()
 {
     cli();
-    // Refresh Interrupt counts
+    // Refresh response count
     ultrasonicResponseCount = 0;
 
-    // update durations
-    ultrasonicResponseDurations[0] = ultrasonicResponseEnds[0] - ultrasonicResponseStarts[0];
-    ultrasonicResponseDurations[1] = ultrasonicResponseEnds[1] - ultrasonicResponseStarts[1];
-    ultrasonicResponseDurations[2] = ultrasonicResponseEnds[2] - ultrasonicResponseStarts[2];
+    // // Update durations
+    // ultrasonicResponseDurations[0] = ultrasonicResponseEnds[0] - ultrasonicResponseStarts[0];
+    // ultrasonicResponseDurations[1] = ultrasonicResponseEnds[1] - ultrasonicResponseStarts[1];
+    // ultrasonicResponseDurations[2] = ultrasonicResponseEnds[2] - ultrasonicResponseStarts[2];
 
-    // Update history entries
-    A13_History[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[0]);
-    A14_History[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[1]);
-    A15_History[ultrasonicHistoryPointer] = microsToCentimeters(ultrasonicResponseDurations[2]);
+    // Update distances
+    ultrasonicDistances[0] = microsToCentimeters(ultrasonicResponseEnds[0] - ultrasonicResponseStarts[0]);
+    ultrasonicDistances[1] = microsToCentimeters(ultrasonicResponseEnds[1] - ultrasonicResponseStarts[1]);
+    ultrasonicDistances[2] = microsToCentimeters(ultrasonicResponseEnds[2] - ultrasonicResponseStarts[2]);
+
+    // Update recent distances history array
+    A13_History[ultrasonicHistoryPointer] = ultrasonicDistances[0];
+    A14_History[ultrasonicHistoryPointer] = ultrasonicDistances[1];
+    A15_History[ultrasonicHistoryPointer] = ultrasonicDistances[2];
 
     // Update pointer
     ultrasonicHistoryPointer++;

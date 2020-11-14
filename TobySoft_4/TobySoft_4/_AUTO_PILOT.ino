@@ -56,8 +56,8 @@ void autoNavigation()
     {
         lastPilotDecision = micros();
 
-        int leftDistance = microsToCentimeters(ultrasonicResponseDurations[1]);
-        int middleDistance = microsToCentimeters(ultrasonicResponseDurations[0]);
+        int leftDistance = ultrasonicDistances[1];
+        int middleDistance = ultrasonicDistances[0];
         if (tofReadDistance < middleDistance) // ensure the more proximate value is used
         {
             middleDistance = tofReadDistance;
@@ -66,7 +66,7 @@ void autoNavigation()
         {
             middleDistance = 1;
         }
-        int rightDistance = microsToCentimeters(ultrasonicResponseDurations[2]);
+        int rightDistance = ultrasonicDistances[2];
 
         if ((middleDistance < 30) || (leftDistance < 25) || (rightDistance < 25))
         {
@@ -109,7 +109,7 @@ void handleCollisionEvent()
 
     if (millis() - collisionStart > 250)
     {
-        if (ultrasonicResponseDurations[2] > ultrasonicResponseDurations[1]) // Right v Left
+        if (ultrasonicDistances[2] > ultrasonicDistances[1]) // Right v Left
         {
             right();
             delay(200);

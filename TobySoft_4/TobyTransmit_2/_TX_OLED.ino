@@ -64,13 +64,12 @@ void displayInitSequence(void)
 
 void updateDisplay()
 {
-    display.clearDisplay();
-
-    displaySendHeader(); // show send data in header
-    displayRxData();     // show rx data in the body
+        display.clearDisplay();
+        drawSendHeader(); // show send data in header
+        displayRxData(); // show rx data in the body
 }
 
-void displaySendHeader(void)
+void drawSendHeader(void)
 {
     // Top bar
     display.fillRect(0, 0, 128, 16, SSD1306_WHITE);
@@ -82,36 +81,36 @@ void displaySendHeader(void)
     display.setCursor(8, 1); // Start at top-left corner
     display.println('x');
     display.setCursor(22, 1);
-    display.println(xAngleValue);
+    display.println(joystick0ValueX);
     //
     display.setCursor(54, 1);
     display.println('y');
     display.setCursor(68, 1);
-    display.println(yAngleValue);
+    display.println(joystick0ValueY);
     //
     display.setCursor(98, 1);
     display.println('s');
     display.setCursor(110, 1);
-    display.println(SW_PinRead);
-
-    display.display();
+    display.println(joystick0ValueSw);
 }
 
 void displayRxData(void)
 {
     if (ackData[0] != -1)
     {
-        // L / R text
-        display.setTextSize(2); // 3:1 pixel scale
-        display.setTextColor(SSD1306_WHITE);
+        drawDistanceBlocks();
 
-        display.setCursor(6, 40);
+        // L / R text
+        display.setTextSize(1.5); // 1.5:1 pixel scale
+        display.setTextColor(SSD1306_BLACK);
+
+        display.setCursor(8, 50);
         display.println(ackData[1]);
         //
-        display.setCursor(56, 40);
+        display.setCursor(56, 50);
         display.println(ackData[0]);
         //
-        display.setCursor(100, 40);
+        display.setCursor(105, 50);
         display.println(ackData[2]);
 
         display.display();
@@ -127,4 +126,32 @@ void displayRxData(void)
 
         display.display();
     }
+}
+
+void drawDistanceBlocks(void)
+{
+
+    const int graphDistanceDivisor = 45; // approx range of values of interest for graph, ie. 0-45cm
+
+    // Get left/center/right height ratios
+    float leftHeight = (float)ackData[1] / graphDistanceDivisor;
+    if (leftHeight > 1)
+    {
+        leftHeight = 1;
+    }
+    float centerHeight = (float)ackData[0] / graphDistanceDivisor;
+    if (centerHeight > 1)
+    {
+        centerHeight = 1;
+    }
+    float rightHeight = (float)ackData[2] / graphDistanceDivisor;
+    if (rightHeight > 1)
+    {
+        rightHeight = 1;
+    }
+
+    // draw L/C/R rects
+    display.fillRect(0, 16 + (48 * (leftHeight)), 34, 64, SSD1306_WHITE);    // LEFT (0-34)
+    display.fillRect(35, 16 + (48 * (centerHeight)), 58, 64, SSD1306_WHITE); // CENTER (35-(64)-92)
+    display.fillRect(94, 16 + (48 * (rightHeight)), 128, 64, SSD1306_WHITE); // RIGHT (94-128)
 }
