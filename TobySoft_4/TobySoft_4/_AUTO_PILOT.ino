@@ -56,17 +56,30 @@ void autoNavigation()
     {
         lastPilotDecision = micros();
 
+        // Get best Front-Left distance
         int leftDistance = ultrasonicDistances[1];
+        if (irProxValueFL == 0)
+        {
+            leftDistance = 1;
+        }
+
+        // Get best Front-Center distance
         int middleDistance = ultrasonicDistances[0];
-        if (tofReadDistance < middleDistance) // ensure the more proximate value is used
+        if (tofReadDistance < middleDistance)
         {
             middleDistance = tofReadDistance;
         }
-        if (irProxValue == 0)
+        if (irProxValueFC == 0)
         {
             middleDistance = 1;
         }
+
+        // Get best Front-Right distance
         int rightDistance = ultrasonicDistances[2];
+        if (irProxValueFR == 0)
+        {
+            rightDistance = 1;
+        }
 
         if ((middleDistance < 30) || (leftDistance < 25) || (rightDistance < 25))
         {

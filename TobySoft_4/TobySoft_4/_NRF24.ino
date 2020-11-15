@@ -69,17 +69,34 @@ void radioLink()
 void updateRadioReplyData()
 {
 
-    ackData[0] = tofReadDistance; // best guess at accurate Center dist, override below if wrong
-    if (irProxValue == 0)
+    // Get best Front-Left distance
+    int leftDistance = ultrasonicDistances[1];
+    if (irProxValueFL == 0)
     {
-        ackData[0] = 1;
+        leftDistance = 1;
     }
-    else if (ultrasonicDistances[0] < tofReadDistance)
+
+    // Get best Front-Center distance
+    int middleDistance = ultrasonicDistances[0];
+    if (tofReadDistance < middleDistance)
     {
-        ackData[0] = ultrasonicDistances[0];
+        middleDistance = tofReadDistance;
     }
-    ackData[1] = ultrasonicDistances[1]; // Left
-    ackData[2] = ultrasonicDistances[2]; // Right
+    if (irProxValueFC == 0)
+    {
+        middleDistance = 1;
+    }
+
+    // Get best Front-Right distance
+    int rightDistance = ultrasonicDistances[2];
+    if (irProxValueFR == 0)
+    {
+        rightDistance = 1;
+    }
+
+    ackData[0] = middleDistance;
+    ackData[1] = leftDistance;
+    ackData[2] = rightDistance;
 
     radio.writeAckPayload(1, &ackData, sizeof(ackData)); // load the payload for the next time
 }
