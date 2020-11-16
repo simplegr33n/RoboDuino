@@ -5,6 +5,8 @@ int joystick0ValueX;
 int joystick0ValueY;
 int joystick0ValueSw;
 
+int bigRedButtonValue;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
 // END GLOBAL VARS                                                                                     //

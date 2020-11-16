@@ -4,13 +4,14 @@
 #define IN3 9
 #define IN4 11
 #define ENA 6
-#define carSpeed 160
+#define carSpeed 140
 int middleDistance, leftDistance, rightDistance;
 unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
 bool handlingCollision = false;
 unsigned long collisionStart = 0;
 
 unsigned long lastControlSwitch = 0; // for RF joystick
+unsigned long lastSafeModeChange = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -33,8 +34,13 @@ void initAutoPilot()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Auto-Pilot functions                                                                                //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-void autoNavigation()
+void handleNavigation()
 {
+    if (AUTOPILOT_ON == false)
+    {
+        manualControl();
+        return;
+    }
 
     if ((dataFromTransmitter[2] == 0) && (micros() - lastControlSwitch > 500000)) // check RF switch for control change
     {
@@ -42,6 +48,14 @@ void autoNavigation()
         stopCar();
         displayLogo();
         AUTOPILOT_ON = false;
+        return;
+    }
+
+    if ((dataFromTransmitter[3] == 1) && (micros() - lastSafeModeChange > 500000)) // check RF big red for safety change
+    {
+        lastSafeModeChange = micros();
+        stopCar();
+        SAFEMODE_ON = !SAFEMODE_ON;
         return;
     }
 
@@ -161,6 +175,14 @@ void manualControl()
         return;
     }
 
+    if ((dataFromTransmitter[3] == 1) && (micros() - lastSafeModeChange > 500000)) // check RF big red for safety change
+    {
+        lastSafeModeChange = micros();
+        stopCar();
+        SAFEMODE_ON = !SAFEMODE_ON;
+        return;
+    }
+
     if ((dataFromTransmitter[0] < 100) && (dataFromTransmitter[0] > 80) && (dataFromTransmitter[1] < 100) && (dataFromTransmitter[1] > 80))
     {
         stopCar();
@@ -217,10 +239,24 @@ void manualControl()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Safe Mode functions                                                                                 //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//.. TODO?
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Motor Driving functions                                                                             //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void forward()
 {
+    if (SAFEMODE_ON == true)
+    {
+        if ((irDropValueFL == 1) || (irDropValueFR == 1))
+        {
+            stopCar();
+            return;
+        }
+    }
+
     DRIVE_INSTRUCTION = "FORWARD";
     analogWrite(ENA, carSpeed);
     analogWrite(ENB, carSpeed);

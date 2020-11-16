@@ -64,9 +64,9 @@ void displayInitSequence(void)
 
 void updateDisplay()
 {
-        display.clearDisplay();
-        drawSendHeader(); // show send data in header
-        displayRxData(); // show rx data in the body
+    display.clearDisplay();
+    drawSendHeader(); // show send data in header
+    displayRxData();  // show rx data in the body
 }
 
 void drawSendHeader(void)
@@ -78,20 +78,39 @@ void drawSendHeader(void)
     display.setTextSize(1.5); // 2:1 pixel scale
     display.setTextColor(SSD1306_BLACK);
 
-    display.setCursor(8, 1); // Start at top-left corner
+    display.setCursor(8, 4); // Start at top-left corner
     display.println('x');
-    display.setCursor(22, 1);
+    display.fillRect(16, 1, 20, 12, SSD1306_BLACK); 
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(18, 4);
     display.println(joystick0ValueX);
     //
-    display.setCursor(54, 1);
+    display.setTextColor(SSD1306_BLACK);
+    display.setCursor(39, 4);
     display.println('y');
-    display.setCursor(68, 1);
+    display.fillRect(47, 1, 20, 12, SSD1306_BLACK); 
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(49, 4);
     display.println(joystick0ValueY);
+
+
+    // Robot Mode text
+    display.drawRect(96, 1, 31, 14, SSD1306_BLACK);
+//    display.fillRect(51, 1, 20, 12, SSD1306_BLACK);
+    display.setTextColor(SSD1306_BLACK);
     //
-    display.setCursor(98, 1);
-    display.println('s');
-    display.setCursor(110, 1);
-    display.println(joystick0ValueSw);
+    display.setCursor(100, 4);
+    if (ackData[0] == 0) {
+          display.fillRect(98, 3, 27, 10, SSD1306_BLACK); 
+          display.setTextColor(SSD1306_WHITE);
+          display.println("FREE");
+    } else if (ackData[0] == 1) {
+          display.println("SAFE");
+    } else if (ackData[0] == 2) {
+          display.println("AUTO");
+    } else  {
+          display.println("N/C");
+    }
 }
 
 void displayRxData(void)
@@ -102,16 +121,19 @@ void displayRxData(void)
 
         // L / R text
         display.setTextSize(1.5); // 1.5:1 pixel scale
-        display.setTextColor(SSD1306_BLACK);
+        display.setTextColor(SSD1306_WHITE);
 
+        display.fillRect(7, 47, 20, 12, SSD1306_BLACK); 
         display.setCursor(8, 50);
+        display.println(ackData[2]);
+        //
+        display.fillRect(55, 47, 20, 12, SSD1306_BLACK); 
+        display.setCursor(56, 50);
         display.println(ackData[1]);
         //
-        display.setCursor(56, 50);
-        display.println(ackData[0]);
-        //
+        display.fillRect(104, 47, 20, 12, SSD1306_BLACK); 
         display.setCursor(105, 50);
-        display.println(ackData[2]);
+        display.println(ackData[3]);
 
         display.display();
     }
@@ -134,17 +156,17 @@ void drawDistanceBlocks(void)
     const int graphDistanceDivisor = 45; // approx range of values of interest for graph, ie. 0-45cm
 
     // Get left/center/right height ratios
-    float leftHeight = (float)ackData[1] / graphDistanceDivisor;
+    float leftHeight = (float)ackData[2] / graphDistanceDivisor;
     if (leftHeight > 1)
     {
         leftHeight = 1;
     }
-    float centerHeight = (float)ackData[0] / graphDistanceDivisor;
+    float centerHeight = (float)ackData[1] / graphDistanceDivisor;
     if (centerHeight > 1)
     {
         centerHeight = 1;
     }
-    float rightHeight = (float)ackData[2] / graphDistanceDivisor;
+    float rightHeight = (float)ackData[3] / graphDistanceDivisor;
     if (rightHeight > 1)
     {
         rightHeight = 1;

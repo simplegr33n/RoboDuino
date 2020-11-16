@@ -10,7 +10,7 @@ RF24 radio(CE_PIN, CSN_PIN); // create a radio
 const byte thisSlaveAddress[5] = {'R', 'x', 'T', 'B', '0'};
 
 unsigned long lastSuccessfulRadioRead = 0;
-int ackData[3] = {0, 0, 0}; // the values to be sent to the RF Transmitter, init 0 for now
+int ackData[4] = {0, 0, 0, 0}; // the values to be sent to the RF Transmitter, init 0 for now
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -59,6 +59,7 @@ void radioLink()
             dataFromTransmitter[0] = -1;
             dataFromTransmitter[1] = -1;
             dataFromTransmitter[2] = -1;
+            dataFromTransmitter[3] = -1;
 
             // // DEBUG
             // Serial.println("No RF Connection");
@@ -68,6 +69,16 @@ void radioLink()
 
 void updateRadioReplyData()
 {
+    // Get robotState
+    int robotState = 0;
+    if (SAFEMODE_ON)
+    {
+        robotState = 1;
+    }
+    if (AUTOPILOT_ON)
+    {
+        robotState = 2;
+    }
 
     // Get best Front-Left distance
     int leftDistance = ultrasonicDistances[1];
@@ -94,9 +105,10 @@ void updateRadioReplyData()
         rightDistance = 1;
     }
 
-    ackData[0] = middleDistance;
-    ackData[1] = leftDistance;
-    ackData[2] = rightDistance;
+    ackData[0] = robotState;
+    ackData[1] = middleDistance;
+    ackData[2] = leftDistance;
+    ackData[3] = rightDistance;
 
     radio.writeAckPayload(1, &ackData, sizeof(ackData)); // load the payload for the next time
 }

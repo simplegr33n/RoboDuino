@@ -12,8 +12,7 @@ const byte slaveAddress[5] = {'R', 'x', 'T', 'B', '0'};
 unsigned long prevMillis = 0;
 unsigned long txIntervalMillis = 50; // send every 1/10th of a second
 
-int transmitData[3];
-int ackData[3] = {-1, -1, -1}; // to hold the three values coming from the robot
+int ackData[4] = {-1, -1, -1, -1}; // values from robot (robotState, midDist, leftDist, rightDist)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -48,7 +47,7 @@ void sendRadioCom()
 
 void sendToToby()
 {
-    int transmitData[3] = {joystick0ValueX, joystick0ValueY, joystick0ValueSw};
+    int transmitData[4] = {joystick0ValueX, joystick0ValueY, joystick0ValueSw, bigRedButtonValue}; // needs to match datatype/size set up to be received on other end
 
     bool rslt;
     rslt = radio.write(&transmitData, sizeof(transmitData)); // !always use sizeof() as it gives the size as the correct number of bytes
@@ -69,6 +68,7 @@ void sendToToby()
         ackData[0] = -1; // set disconnected values
         ackData[1] = -1;
         ackData[2] = -1;
+        ackData[3] = -1;
         Serial.println("  Tx failed");
     }
 
