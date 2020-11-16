@@ -80,7 +80,7 @@ void drawSendHeader(void)
 
     display.setCursor(8, 4); // Start at top-left corner
     display.println('x');
-    display.fillRect(16, 1, 20, 12, SSD1306_BLACK); 
+    display.fillRect(16, 1, 20, 12, SSD1306_BLACK);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(18, 4);
     display.println(joystick0ValueX);
@@ -88,28 +88,34 @@ void drawSendHeader(void)
     display.setTextColor(SSD1306_BLACK);
     display.setCursor(39, 4);
     display.println('y');
-    display.fillRect(47, 1, 20, 12, SSD1306_BLACK); 
+    display.fillRect(47, 1, 20, 12, SSD1306_BLACK);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(49, 4);
     display.println(joystick0ValueY);
 
-
     // Robot Mode text
     display.drawRect(96, 1, 31, 14, SSD1306_BLACK);
-//    display.fillRect(51, 1, 20, 12, SSD1306_BLACK);
+    //    display.fillRect(51, 1, 20, 12, SSD1306_BLACK);
     display.setTextColor(SSD1306_BLACK);
     //
     display.setCursor(100, 4);
-    if (ackData[0] == 0) {
-          display.fillRect(98, 3, 27, 10, SSD1306_BLACK); 
-          display.setTextColor(SSD1306_WHITE);
-          display.println("FREE");
-    } else if (ackData[0] == 1) {
-          display.println("SAFE");
-    } else if (ackData[0] == 2) {
-          display.println("AUTO");
-    } else  {
-          display.println("N/C");
+    if (ackData[0] == 0)
+    {
+        display.fillRect(98, 3, 27, 10, SSD1306_BLACK);
+        display.setTextColor(SSD1306_WHITE);
+        display.println("FREE");
+    }
+    else if (ackData[0] == 1)
+    {
+        display.println("SAFE");
+    }
+    else if (ackData[0] == 2)
+    {
+        display.println("AUTO");
+    }
+    else
+    {
+        display.println("N/C");
     }
 }
 
@@ -123,15 +129,15 @@ void displayRxData(void)
         display.setTextSize(1.5); // 1.5:1 pixel scale
         display.setTextColor(SSD1306_WHITE);
 
-        display.fillRect(7, 47, 20, 12, SSD1306_BLACK); 
+        display.fillRect(7, 47, 20, 12, SSD1306_BLACK);
         display.setCursor(8, 50);
         display.println(ackData[2]);
         //
-        display.fillRect(55, 47, 20, 12, SSD1306_BLACK); 
+        display.fillRect(55, 47, 20, 12, SSD1306_BLACK);
         display.setCursor(56, 50);
         display.println(ackData[1]);
         //
-        display.fillRect(104, 47, 20, 12, SSD1306_BLACK); 
+        display.fillRect(104, 47, 20, 12, SSD1306_BLACK);
         display.setCursor(105, 50);
         display.println(ackData[3]);
 

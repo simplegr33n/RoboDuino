@@ -1,4 +1,4 @@
-[<img src="https://raw.githubusercontent.com/simplegr33n/RoboDuino/master/_assets/tobylogo2.bmp" width="600">](https://github.com/simplegr33n/RoboDuino/tree/master/TobySoft_1)
+[<img src="https://raw.githubusercontent.com/simplegr33n/RoboDuino/master/_assets/TS1.bmp" width="600">](https://github.com/simplegr33n/RoboDuino/tree/master/TobySoft_1)
 
 # TobySoft 1.0
 

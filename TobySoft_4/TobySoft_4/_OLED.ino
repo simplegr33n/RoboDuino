@@ -52,8 +52,8 @@ void initOLED()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void displayInitSequence(void)
 {
-    display.clearDisplay();
     // Draw TobySoft beta bootscreen
+    display.clearDisplay();
     display.drawBitmap(
         0,
         0,
@@ -62,8 +62,8 @@ void displayInitSequence(void)
     display.display();
     delay(1000);
 
-    display.clearDisplay();
     // Draw TobySoft 1.0 bootscreen
+    display.clearDisplay();
     display.drawBitmap(
         0,
         0,
@@ -72,8 +72,8 @@ void displayInitSequence(void)
     display.display();
     delay(1000);
 
-    display.clearDisplay();
     // Draw TobySoft 2.0 bootscreen
+    display.clearDisplay();
     display.drawBitmap(
         0,
         0,
@@ -82,8 +82,8 @@ void displayInitSequence(void)
     display.display();
     delay(1000);
 
-    display.clearDisplay();
     // Draw TobySoft 3.0 bootscreen
+    display.clearDisplay();
     display.drawBitmap(
         0,
         0,
@@ -92,8 +92,8 @@ void displayInitSequence(void)
     display.display();
     delay(1000);
 
-    display.clearDisplay();
     // Draw TobySoft 4.0 bootscreen
+    display.clearDisplay();
     display.drawBitmap(
         0,
         0,
@@ -186,7 +186,7 @@ void displayLogo()
     display.drawBitmap(
         0,
         0,
-        TS4_BMP, 128, 64, 1);
+        TS5_BMP, 128, 64, 1);
 
     display.display();
 }
