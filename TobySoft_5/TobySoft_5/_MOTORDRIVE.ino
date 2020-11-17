@@ -8,6 +8,13 @@
 
 #define carSpeed 140
 
+// Advanced function variables
+unsigned long advancedFunctionStart = 0;
+bool adv_right360 = false;
+bool adv_left360 = false;
+bool adv_searchRight = false;
+bool adv_searchLeft = false;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
 // END GLOBAL VARS                                                                                     //
@@ -23,7 +30,7 @@ void initDriveMotors()
     pinMode(MOTOR_IN4, OUTPUT);
     pinMode(MOTOR_ENA, OUTPUT);
     pinMode(MOTOR_ENB, OUTPUT);
-    stopMotors(0); // Stop for good measure..
+    stopDrive(0); // Stop for good measure..
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,12 +45,35 @@ void driveMotors(int direction)
             return; // ignore instructions to motors if collision detected
         }
 
+        // Advanced Drive functions
+        if (adv_right360)
+        {
+            right360();
+            return;
+        }
+        if (adv_left360)
+        {
+            left360();
+            return;
+        }
+        if (adv_searchRight)
+        {
+            searchRight();
+            return;
+        }
+        if (adv_searchLeft)
+        {
+            searchLeft();
+            return;
+        }
+
+        // Basic Drive functions
         switch (direction)
         {
         case 0: // Stop
             if (checkStopSafety())
             {
-                stopMotors(0);
+                stopDrive(0);
             }
             break;
         case 1: // Forward
@@ -79,7 +109,7 @@ void driveMotors(int direction)
         switch (direction)
         {
         case 0: // Stop
-            stopMotors(0);
+            stopDrive(0);
             break;
         case 1: // Forward
             forwardDrive(carSpeed);
@@ -146,9 +176,112 @@ void rightDrive(int speed)
     digitalWrite(MOTOR_IN4, LOW);
 }
 
-void stopMotors(int speed) // TODO: speed argument applies a small reverse/delay() if not 0, in case of sudden stop at dropoff
+void stopDrive(int speed) // TODO: speed argument applies a small reverse/delay() if not 0, in case of sudden stop at dropoff
 {
     DRIVE_INSTRUCTION = "STOP";
     digitalWrite(MOTOR_ENA, LOW);
     digitalWrite(MOTOR_ENB, LOW);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Advanced Driving functions                                                                          //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void searchLeft()
+{
+    if (advancedFunctionStart == 0)
+    {
+        advancedFunctionStart = micros();
+    }
+    else
+    {
+        if (micros() - advancedFunctionStart > 2780000)
+        {
+            advancedFunctionStart = 0;
+            adv_searchLeft = false;
+            stopDrive(0);
+            playErrorSound();
+        }
+
+        if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
+        {
+            leftDrive(160);
+        }
+        else
+        {
+            advancedFunctionStart = 0;
+            adv_searchLeft = false;
+            stopDrive(0);
+        }
+    }
+}
+
+void searchRight()
+{
+    if (advancedFunctionStart == 0)
+    {
+        advancedFunctionStart = micros();
+    }
+    else
+    {
+        if (micros() - advancedFunctionStart > 2780000)
+        {
+            advancedFunctionStart = 0;
+            adv_searchRight = false;
+            stopDrive(0);
+            playErrorSound();
+        }
+
+        if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
+        {
+            rightDrive(160);
+        }
+        else
+        {
+            advancedFunctionStart = 0;
+            adv_searchRight = false;
+            stopDrive(0);
+        }
+    }
+}
+
+void right360()
+{
+    if (advancedFunctionStart == 0)
+    {
+        advancedFunctionStart = micros();
+    }
+    else
+    {
+        if (micros() - advancedFunctionStart < 2780000)
+        {
+            rightDrive(160);
+        }
+        else
+        {
+            advancedFunctionStart = 0;
+            adv_right360 = false;
+            stopDrive(0);
+        }
+    }
+}
+
+void left360()
+{
+    if (advancedFunctionStart == 0)
+    {
+        advancedFunctionStart = micros();
+    }
+    else
+    {
+        if (micros() - advancedFunctionStart < 2780000)
+        {
+            leftDrive(160);
+        }
+        else
+        {
+            advancedFunctionStart = 0;
+            adv_left360 = false;
+            stopDrive(0);
+        }
+    }
 }
