@@ -27,14 +27,13 @@ void autoControl()
     if ((micros() - lastPilotDecision > autoPilotDecisionInterval))
     {
 
-        if (checkFowardSafety() == false)
+        if ((advancedFunctionStart != 0) || (checkFowardSafety() == false))
         {
-            Serial.println("evade");
             tryEvade();
         }
         else
         {
-            Serial.println("drive");
+            clearAdvancedFunctions();
             driveMotors(1); // go forward
         }
     }
@@ -42,25 +41,24 @@ void autoControl()
 
 void tryEvade()
 {
-    if (advancedFunctionStart != 0) // evade still in progress
-    {       
-        return;
-    }
-
     Serial.println("NEW EVADE!");
 
     switch (evadeTryCount)
     {
     case 0: // Try left Clearing Search
+        Serial.println("evade: FCL");
         findClearLeft();
         break;
     case 1: // Try backing to the left
+        Serial.println("evade: BTL");
         backLeftEvade();
         break;
     case 2: // Try right Clearing Search
+        Serial.println("evade: FCR");
         findClearRight();
         break;
     case 3: // Try backing to the right
+        Serial.println("evade: BTR");
         backRightEvade();
         break;
     default:
@@ -78,8 +76,6 @@ void tryEvade()
         }
         break;
     }
-
-    evadeTryCount++;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

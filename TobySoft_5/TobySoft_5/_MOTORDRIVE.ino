@@ -245,6 +245,7 @@ void findClearLeft()
 {
     if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkLeftSafety() == false))
     {
+        evadeTryCount++;
         clearAdvancedFunctions();
         playWarningSound();
     }
@@ -258,16 +259,17 @@ void findClearLeft()
     {
         if (micros() - advancedFunctionStart > fullTurn160) // give up after a full rotation without a clearing
         {
+            evadeTryCount++;
             clearAdvancedFunctions();
             playErrorSound();
         }
-
         if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
         {
             leftDrive(160);
         }
         else
         {
+            evadeTryCount++;
             clearAdvancedFunctions();
         }
     }
@@ -277,6 +279,7 @@ void findClearRight()
 {
     if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkRightSafety() == false))
     {
+        evadeTryCount++;
         clearAdvancedFunctions();
         playWarningSound();
     }
@@ -290,6 +293,7 @@ void findClearRight()
     {
         if (micros() - advancedFunctionStart > fullTurn160) // give up after a full rotation without a clearing
         {
+            evadeTryCount++;
             clearAdvancedFunctions();
             playErrorSound();
         }
@@ -300,6 +304,7 @@ void findClearRight()
         }
         else
         {
+            evadeTryCount++;
             clearAdvancedFunctions();
         }
     }
@@ -323,13 +328,18 @@ void backLeftEvade()
         {
             if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkLeftSafety() == false))
             {
+                evadeTryCount++;
                 clearAdvancedFunctions();
                 playWarningSound();
             }
-            leftDrive(160);
+            else
+            {
+                leftDrive(160);
+            }
         }
         else
         {
+            evadeTryCount++;
             clearAdvancedFunctions();
         }
     }
@@ -353,13 +363,18 @@ void backRightEvade()
         {
             if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkRightSafety() == false))
             {
+                evadeTryCount++;
                 clearAdvancedFunctions();
                 playWarningSound();
             }
-            rightDrive(160);
+            else
+            {
+                rightDrive(160);
+            }
         }
         else
         {
+            evadeTryCount++;
             clearAdvancedFunctions();
         }
     }
@@ -367,7 +382,6 @@ void backRightEvade()
 
 void clearAdvancedFunctions()
 {
-    stopDrive(0);
     advancedFunctionStart = 0;
     adv_rightDegrees = false;
     adv_leftDegrees = false;
