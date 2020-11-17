@@ -18,7 +18,7 @@ Arduino Mega based self driving car. Now with more crunchies.
 
 **DFR0299** - DFPlayer Mini, a nifty little MP3 playing microcontroller _(and a small speaker for video game tunes)_
 
-## Uno Pinout
+## Mega Pinout
 
 | Pin              | _sensor_           | _sensor pin_ | _notes_                             |
 | ---------------- | ------------------ | ------------ | ----------------------------------- |

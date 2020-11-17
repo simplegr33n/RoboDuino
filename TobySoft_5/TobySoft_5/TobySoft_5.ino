@@ -1,8 +1,17 @@
- /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// For AutoPilot                                                                                       //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// For Main loop()                                                                                     //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool AUTOPILOT_ON = false;
 bool SAFEMODE_ON = true;
+//
+#define toggleDebounce 500000 // half second debounce for rf button toggles
+unsigned long lastAutoPilotToggle = 0;
+unsigned long lastSafeModeToggle = 0;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// For Safe Mode                                                                                       //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+int BLOCKED_DRIVE_COUNT = 0; // a count used by AutoPilot to determine what to try next when blocked
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For Ultrasonic                                                                                      //
@@ -71,7 +80,7 @@ void setup()
   initOLED();
   initTOF10120();
   initIRProx();
-  initAutoPilot();
+  initDriveMotors();
 }
 
 void loop()
@@ -100,7 +109,7 @@ void loop()
   // Auto-Pilot
   if (AUTOPILOT_ON)
   {
-    handleNavigation();
+    autoControl();
   }
   else
   {

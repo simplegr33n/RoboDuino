@@ -60,46 +60,7 @@ void checkIR_Remote()
       break;
     case KEY_STAR:
       // Start/Stop autonomous function
-      if (AUTOPILOT_ON == true)
-      {
-        stopCar();
-        AUTOPILOT_ON = false;
-        displayLogo();
-      }
-      else
-      {
-        AUTOPILOT_ON = true;
-        displayUltrasonicHeader();
-      }
-      break;
-
-      // Driving
-    case FWD:
-      forward();
-      AUTOPILOT_ON = false;
-      displayLogo();
-      break;
-    case B:
-      reverse();
-      AUTOPILOT_ON = false;
-      displayLogo();
-      break;
-    case L:
-      left();
-      AUTOPILOT_ON = false;
-      displayLogo();
-      break;
-    case R:
-      right();
-      AUTOPILOT_ON = false;
-      displayLogo();
-      break;
-    case S:
-      stopCar();
-      AUTOPILOT_ON = false;
-      displayLogo();
-      break;
-    default:
+      toggleAutoPilot();
       break;
     }
   }

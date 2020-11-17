@@ -196,7 +196,7 @@ void displayLogo()
     display.drawBitmap(
         0,
         0,
-        TS4_BMP, 128, 64, 1);
+        TS5_BMP, 128, 64, 1);
 
     display.display();
 }

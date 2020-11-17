@@ -444,7 +444,7 @@ void autoNavigation()
 // Signal motors using DRIVE_STATE
 void executeMotorFunction()
 {
-  switch (DRIVE_STATE)
+   (DRIVE_STATE)
   {
   //  0 = STOPPED, 1 = FORWARD, -1 = REVERSE, 2 = LEFT, 3 = RIGHT
   case 1:

@@ -2,7 +2,7 @@
 
 # TobySoft 5.0
 
-Advanced TobySoft and TobyTransmit by a version to start "finalizing" a basic univeral remote design, and rework the ai for additional sensors (ie. ground facing IRs to check for drops) and to allow for more
+Advanced TobySoft and TobyTransmit by a version to start "finalizing" a basic univeral remote design and create a more extensible ai flow to accomodate working with additional sensors and possibly other processors like the Jetson Nano.
 
 ## TobyTransmit 3.0
 
@@ -36,7 +36,7 @@ Sketch for the remote manual control Arduino.
 
 **DFR0299** - DFPlayer Mini, a nifty little MP3 playing microcontroller _(and a small speaker for video game tunes)_
 
-## Uno Pinout
+## Mega Pinout
 
 | Pin              | _sensor_                  | _sensor pin_ | _notes_                                  |
 | ---------------- | ------------------------- | ------------ | ---------------------------------------- |

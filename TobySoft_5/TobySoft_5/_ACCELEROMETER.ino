@@ -1,40 +1,28 @@
-/*
-The circuit:
-      3V: VCC
-Analog 1: x-axis
-*/
-
 #define accelerometerPinX A1 // x-axis of the accelerometer
-float collisionThresholdForward = 1.35;
-float collisionThresholdTurn = 1.35;
+float collisionThreshold = 1.35;
 
-void checkForCollision()
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ///////////////                                                                                     //
+// END GLOBAL VARS                                                                                     //
+// ///////////////                                                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool checkForCollision()
 {
 
     if ((DRIVE_INSTRUCTION == "STOP") || (DRIVE_INSTRUCTION == "REVERSE"))
     {
-        return; // Ignore accelerometer
+        return false; // Ignore accelerometer when stopped/reversing.
     }
 
-    if (DRIVE_INSTRUCTION == "FORWARD")
+    int x = analogRead(accelerometerPinX); // read from accelerometerPinX
+
+    if (((((float)x - 331.5) / 65) > collisionThreshold)) // collision detected!
     {
-        int x = analogRead(accelerometerPinX); //read from xpin
-
-        if (((((float)x - 331.5) / 65) > collisionThresholdForward)) // Collision detected!
-        {
-            handleCollisionEvent();
-        }
+        BLOCKED_DRIVE_COUNT++;
+        return true; // indicate collision detected
     }
-
-    if ((DRIVE_INSTRUCTION == "LEFT") || (DRIVE_INSTRUCTION == "RIGHT"))
-    {
-        int x = analogRead(accelerometerPinX); //read from xpin
-
-        if (((((float)x - 331.5) / 65) > collisionThresholdTurn)) // Collision detected!
-        {
-            handleCollisionEvent();
-        }
-    }
+    return false;
 
     // DEBUG
     // Serial.print(((float)x - 331.5) / 65); //print x value on serial monitor
