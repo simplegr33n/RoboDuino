@@ -17,7 +17,6 @@ unsigned long lastTOFRead = 0; // micros() timestamp of last TOF10120 read
 
 void initTOF10120()
 {
-    Serial.println("Front Facing TOF online");
     Wire.begin();
 }
 
@@ -36,8 +35,6 @@ void readTOFDistance()
         lenth_val |= i2c_rx_buf[1];
 
         tofReadDistance = (int)lenth_val / 10; // get centimeter value to harmonize with ultrasonics
-
-        Serial.println(tofReadDistance);
     }
 }
 

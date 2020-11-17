@@ -20,6 +20,8 @@ int tofReadDistance = 0;
 
 void initDistanceSensors()
 {
+    Serial.println("TobySoft Distance Sensors initiating");
+
     initUltrasonicInterrupts();
     initIR_Remote();
     initTOF10120();
@@ -54,12 +56,12 @@ void getDistances()
     }
 
     // Get best Front-Center distance
-    frontMiddleDistance = ultrasonicDistances[0];
-    if (tofReadDistance < frontMiddleDistance)
-    {
-        Serial.println(tofReadDistance);
-        frontMiddleDistance = tofReadDistance;
-    }
+    // frontMiddleDistance = ultrasonicDistances[0]; // TODO: FIX ultrasonic mid... ignoring for now
+    // if (tofReadDistance < frontMiddleDistance)
+    // {
+    //     frontMiddleDistance = tofReadDistance;
+    // }
+    frontMiddleDistance = tofReadDistance;
     if (irProxValueFC == 0)
     {
         frontMiddleDistance = 1;

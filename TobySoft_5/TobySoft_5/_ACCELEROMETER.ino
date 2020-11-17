@@ -20,8 +20,6 @@ bool checkForCollision()
     if (((((float)x - 331.5) / 65) > collisionThreshold)) // collision detected!
     {
         playErrorSound();
-
-        BLOCKED_DRIVE_COUNT++;
         return true; // indicate collision detected
     }
     return false;

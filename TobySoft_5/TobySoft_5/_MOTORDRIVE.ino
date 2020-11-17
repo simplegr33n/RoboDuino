@@ -9,7 +9,6 @@
 #define carSpeed 140
 
 // Advanced function variables
-unsigned long advancedFunctionStart = 0;
 #define fullTurn160 3000000 // millis duration for a 360 degree turn at 160 speed
 int adv_turnDegrees = 360;
 bool adv_rightDegrees = false;
@@ -190,89 +189,11 @@ void stopDrive(int speed) // TODO: speed argument applies a small reverse/delay(
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Advanced Driving functions                                                                          //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-void findClearLeft()
-{
-    if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkLeftSafety() == false))
-    {
-        advancedFunctionStart = 0;
-        adv_findOpenLeft = false;
-        stopDrive(0);
-        playWarningSound();
-    }
-
-    if (advancedFunctionStart == 0)
-    {
-        advancedFunctionStart = micros();
-        adv_findOpenLeft = true;
-    }
-    else
-    {
-        if (micros() - advancedFunctionStart > fullTurn160) // give up after a full rotation without a clearing
-        {
-            advancedFunctionStart = 0;
-            adv_findOpenLeft = false;
-            stopDrive(0);
-            playErrorSound();
-        }
-
-        if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
-        {
-            leftDrive(160);
-        }
-        else
-        {
-            advancedFunctionStart = 0;
-            adv_findOpenLeft = false;
-            stopDrive(0);
-        }
-    }
-}
-
-void findClearRight()
-{
-    if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkRightSafety() == false))
-    {
-        advancedFunctionStart = 0;
-        adv_findOpenRight = false;
-        stopDrive(0);
-        playWarningSound();
-    }
-
-    if (advancedFunctionStart == 0)
-    {
-        advancedFunctionStart = micros();
-        adv_findOpenRight = true;
-    }
-    else
-    {
-        if (micros() - advancedFunctionStart > fullTurn160) // give up after a full rotation without a clearing
-        {
-            advancedFunctionStart = 0;
-            adv_findOpenRight = false;
-            stopDrive(0);
-            playErrorSound();
-        }
-
-        if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
-        {
-            rightDrive(160);
-        }
-        else
-        {
-            advancedFunctionStart = 0;
-            adv_findOpenRight = false;
-            stopDrive(0);
-        }
-    }
-}
-
 void leftDegrees(int degrees)
 {
     if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkLeftSafety() == false))
     {
-        advancedFunctionStart = 0;
-        adv_leftDegrees = false;
-        stopDrive(0);
+        clearAdvancedFunctions();
         playWarningSound();
     }
 
@@ -289,9 +210,7 @@ void leftDegrees(int degrees)
         }
         else
         {
-            advancedFunctionStart = 0;
-            adv_leftDegrees = false;
-            stopDrive(0);
+            clearAdvancedFunctions();
         }
     }
 }
@@ -300,9 +219,7 @@ void rightDegrees(int degrees)
 {
     if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkRightSafety() == false))
     {
-        advancedFunctionStart = 0;
-        adv_rightDegrees = false;
-        stopDrive(0);
+        clearAdvancedFunctions();
         playWarningSound();
     }
 
@@ -319,9 +236,71 @@ void rightDegrees(int degrees)
         }
         else
         {
-            advancedFunctionStart = 0;
-            adv_rightDegrees = false;
-            stopDrive(0);
+            clearAdvancedFunctions();
+        }
+    }
+}
+
+void findClearLeft()
+{
+    if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkLeftSafety() == false))
+    {
+        clearAdvancedFunctions();
+        playWarningSound();
+    }
+
+    if (advancedFunctionStart == 0)
+    {
+        advancedFunctionStart = micros();
+        adv_findOpenLeft = true;
+    }
+    else
+    {
+        if (micros() - advancedFunctionStart > fullTurn160) // give up after a full rotation without a clearing
+        {
+            clearAdvancedFunctions();
+            playErrorSound();
+        }
+
+        if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
+        {
+            leftDrive(160);
+        }
+        else
+        {
+            clearAdvancedFunctions();
+        }
+    }
+}
+
+void findClearRight()
+{
+    if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkRightSafety() == false))
+    {
+        clearAdvancedFunctions();
+        playWarningSound();
+    }
+
+    if (advancedFunctionStart == 0)
+    {
+        advancedFunctionStart = micros();
+        adv_findOpenRight = true;
+    }
+    else
+    {
+        if (micros() - advancedFunctionStart > fullTurn160) // give up after a full rotation without a clearing
+        {
+            clearAdvancedFunctions();
+            playErrorSound();
+        }
+
+        if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
+        {
+            rightDrive(160);
+        }
+        else
+        {
+            clearAdvancedFunctions();
         }
     }
 }
@@ -344,18 +323,14 @@ void backLeftEvade()
         {
             if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkLeftSafety() == false))
             {
-                advancedFunctionStart = 0;
-                adv_backLeftEvade = false;
-                stopDrive(0);
+                clearAdvancedFunctions();
                 playWarningSound();
             }
             leftDrive(160);
         }
         else
         {
-            advancedFunctionStart = 0;
-            adv_backLeftEvade = false;
-            stopDrive(0);
+            clearAdvancedFunctions();
         }
     }
 }
@@ -378,24 +353,22 @@ void backRightEvade()
         {
             if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkRightSafety() == false))
             {
-                advancedFunctionStart = 0;
-                adv_backRightEvade = false;
-                stopDrive(0);
+                clearAdvancedFunctions();
                 playWarningSound();
             }
             rightDrive(160);
         }
         else
         {
-            advancedFunctionStart = 0;
-            adv_backRightEvade = false;
-            stopDrive(0);
+            clearAdvancedFunctions();
         }
     }
 }
 
-void cancelAdvancedFunctions()
+void clearAdvancedFunctions()
 {
+    stopDrive(0);
+    advancedFunctionStart = 0;
     adv_rightDegrees = false;
     adv_leftDegrees = false;
     adv_findOpenRight = false;

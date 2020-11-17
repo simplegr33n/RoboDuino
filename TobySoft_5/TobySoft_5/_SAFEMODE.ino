@@ -4,15 +4,13 @@
 // FORWARD
 bool checkFowardSafety()
 {
+
+    Serial.println("Checking forward safety");
+
     if ((frontMiddleDistance > 15) && (frontLeftDistance > 10) && (frontRightDistance > 10) && (irDropValueFL == 0) && (irDropValueFR == 0))
     {
-        evadeTryCount = 0;
-        evadeLoopCount = 0;
-        BLOCKED_DRIVE_COUNT = 0;
         return true;
     }
-
-    BLOCKED_DRIVE_COUNT++;
     return false;
 }
 
@@ -23,8 +21,6 @@ bool checkLeftSafety()
     {
         return true;
     }
-
-    BLOCKED_DRIVE_COUNT++;
     return false;
 }
 
@@ -35,8 +31,6 @@ bool checkRightSafety()
     {
         return true;
     }
-
-    BLOCKED_DRIVE_COUNT++;
     return false;
 }
 
@@ -50,7 +44,7 @@ bool checkStopSafety()
 // REVERSE
 bool checkReverseSafety()
 {
-    Serial.println("No sensors for reverse safety check!");
+    // Serial.println("No sensors for reverse safety check!");
     return true;
 }
 
