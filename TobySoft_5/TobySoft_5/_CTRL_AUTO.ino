@@ -37,12 +37,9 @@ void autoControl()
         case 3: // Try reverse
             driveMotors(-1);
             break;
-        case 4: // reseting count for now... maybe cleaner sensor data arrives on next loop?
-            driveMotors(0);
-            BLOCKED_DRIVE_COUNT = 0;
-            // TODO: consider limiting resets with a counter
-            break;
         default:
+            driveMotors(0);
+            playWarningSound();
             // TODO: robo sleep. no valid paths.
             break;
         }

@@ -78,35 +78,10 @@ void updateRadioReplyData()
         robotState = 2;
     }
 
-    // Get best Front-Left distance
-    int leftDistance = ultrasonicDistances[1];
-    if (irProxValueFL == 0)
-    {
-        leftDistance = 1;
-    }
-
-    // Get best Front-Center distance
-    int middleDistance = ultrasonicDistances[0];
-    if (tofReadDistance < middleDistance)
-    {
-        middleDistance = tofReadDistance;
-    }
-    if (irProxValueFC == 0)
-    {
-        middleDistance = 1;
-    }
-
-    // Get best Front-Right distance
-    int rightDistance = ultrasonicDistances[2];
-    if (irProxValueFR == 0)
-    {
-        rightDistance = 1;
-    }
-
     ackData[0] = robotState;
-    ackData[1] = middleDistance;
-    ackData[2] = leftDistance;
-    ackData[3] = rightDistance;
+    ackData[1] = frontMiddleDistance;
+    ackData[2] = frontLeftDistance;
+    ackData[3] = frontRightDistance;
 
     radio.writeAckPayload(1, &ackData, sizeof(ackData)); // load the payload for the next time
 }

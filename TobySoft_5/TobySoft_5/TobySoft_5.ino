@@ -14,17 +14,13 @@ unsigned long lastSafeModeToggle = 0;
 int BLOCKED_DRIVE_COUNT = 0; // a count used by AutoPilot to determine what to try next when blocked
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// For Ultrasonic                                                                                      //
+// For Distance Harmonizer                                                                             //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define ultrasonicSensorQuantity 3 // Number of ultrasonic sensors hooked up
-#define ULTRASONIC_INTERVAL 20000  // needs some tuning (30000 perhaps minimum)
-unsigned long lastUltrasonicTrigger = 0;
-volatile bool ultrasonicInterruptCalled = false;
+int frontLeftDistance, frontMiddleDistance, frontRightDistance;
 
-// unsigned long ultrasonicResponseDurations[ultrasonicSensorQuantity];
-
-int ultrasonicDistances[ultrasonicSensorQuantity]; // array of most recent ultrasonic distance reads
-// Historical distance readings
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// For Ultrasonic historical graph                                                                     //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 int A13_History[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int A14_History[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int A15_History[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -36,7 +32,7 @@ int ultrasonicHistoryPointer = 0; // Pointer for referencing position in history
 int tofReadDistance = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// IR Proximity                                                                                        //
+// For IR Proximity                                                                                    //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 int irProxValueFL = 0;
 int irProxValueFC = 0;
@@ -58,8 +54,6 @@ int dataFromTransmitter[4]; // for receive data, must match transmitter datatype
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For DF Player                                                                                       //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-#include "DFRobotDFPlayerMini.h"
-DFRobotDFPlayerMini myDFPlayer;
 bool MUSIC_ON = false;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,38 +69,23 @@ void setup()
   Serial2.begin(9600);  // Hardware Serial2 for DFPlayer -- seems to need 9600 baud
 
   // Initiate robot systems
-  initUltrasonicInterrupts(); // Must init Ultrasonic Interrupts before NRF24L01
-  initIR_Remote();
+  initDistanceSensors(); // Must init before NRF24L01
   initNRF24();
   initDFPLAYER();
   initOLED();
-  initTOF10120();
-  initIRProx();
   initDriveMotors();
 }
 
 void loop()
 {
-  // Check for RF instructions
+  // get distances through Distance Harmonizer
+  getDistances();
+
+  // check NRF24 for radio instructions
   radioLink();
 
-  // Check for IR remote signal
+  // check for IR remote signal [todo: deprecate]
   checkIR_Remote();
-
-  // Manage HC-SR04 Triggers
-  triggerSensors();
-
-  // Manage HC-SR04 interrupts
-  if (ultrasonicInterruptCalled)
-  {
-    resolveUltrasonicInterrupt();
-  }
-
-  // Manage TOF10120
-  readTOFDistance();
-
-  // Check IR Proximity sensors
-  checkIRProx();
 
   // Auto-Pilot
   if (AUTOPILOT_ON)

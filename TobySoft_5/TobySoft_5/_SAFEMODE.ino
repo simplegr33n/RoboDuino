@@ -4,32 +4,33 @@
 // FORWARD
 bool checkFowardSafety()
 {
-    // Get best Front-Left distance
-    int leftDistance = ultrasonicDistances[1];
-    if (irProxValueFL == 0)
+    if ((frontMiddleDistance > 15) && (frontLeftDistance > 10) && (frontRightDistance > 10) && (irDropValueFL == 0) && (irDropValueFR == 0))
     {
-        leftDistance = 1;
+        BLOCKED_DRIVE_COUNT = 0;
+        return true;
     }
 
-    // Get best Front-Center distance
-    int middleDistance = ultrasonicDistances[0];
-    if (tofReadDistance < middleDistance)
+    BLOCKED_DRIVE_COUNT++;
+    return false;
+}
+
+// LEFT
+bool checkLeftSafety()
+{
+    if ((frontMiddleDistance > 15) && (frontLeftDistance > 10) && (irDropValueFL == 0))
     {
-        middleDistance = tofReadDistance;
-    }
-    if (irProxValueFC == 0)
-    {
-        middleDistance = 1;
+        BLOCKED_DRIVE_COUNT = 0;
+        return true;
     }
 
-    // Get best Front-Right distance
-    int rightDistance = ultrasonicDistances[2];
-    if (irProxValueFR == 0)
-    {
-        rightDistance = 1;
-    }
+    BLOCKED_DRIVE_COUNT++;
+    return false;
+}
 
-    if ((middleDistance > 15) && (leftDistance > 10) && (rightDistance > 10) && (irDropValueFL == 0) && (irDropValueFR == 0))
+// RIGHT
+bool checkRightSafety()
+{
+    if ((frontMiddleDistance > 15) && (frontRightDistance > 10) && (irDropValueFR == 0))
     {
         BLOCKED_DRIVE_COUNT = 0;
         return true;
@@ -55,68 +56,6 @@ bool checkReverseSafety()
 
     BLOCKED_DRIVE_COUNT = 0;
     return true;
-}
-
-// LEFT
-bool checkLeftSafety()
-{
-    // Get best Front-Left distance
-    int leftDistance = ultrasonicDistances[1];
-    if (irProxValueFL == 0)
-    {
-        leftDistance = 1;
-    }
-
-    // Get best Front-Center distance
-    int middleDistance = ultrasonicDistances[0];
-    if (tofReadDistance < middleDistance)
-    {
-        middleDistance = tofReadDistance;
-    }
-    if (irProxValueFC == 0)
-    {
-        middleDistance = 1;
-    }
-
-    if ((middleDistance > 15) && (leftDistance > 10) && (irDropValueFL == 0))
-    {
-        BLOCKED_DRIVE_COUNT = 0;
-        return true;
-    }
-
-    BLOCKED_DRIVE_COUNT++;
-    return false;
-}
-
-// RIGHT
-bool checkRightSafety()
-{
-    // Get best Front-Center distance
-    int middleDistance = ultrasonicDistances[0];
-    if (tofReadDistance < middleDistance)
-    {
-        middleDistance = tofReadDistance;
-    }
-    if (irProxValueFC == 0)
-    {
-        middleDistance = 1;
-    }
-
-    // Get best Front-Right distance
-    int rightDistance = ultrasonicDistances[2];
-    if (irProxValueFR == 0)
-    {
-        rightDistance = 1;
-    }
-
-    if ((middleDistance > 15) && (rightDistance > 10) && (irDropValueFR == 0))
-    {
-        BLOCKED_DRIVE_COUNT = 0;
-        return true;
-    }
-
-    BLOCKED_DRIVE_COUNT++;
-    return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

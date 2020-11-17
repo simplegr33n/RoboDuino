@@ -23,7 +23,14 @@
 
 #include <HardwareSerial.h>
 
+#include "DFRobotDFPlayerMini.h"
+
+DFRobotDFPlayerMini myDFPlayer;
+
 void printDetail(uint8_t type, int value);
+
+#define warningErrorInterval 2000000
+unsigned long lastWarningError = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -122,6 +129,28 @@ void playSafeToggleSound()
     {
         myDFPlayer.pause();
         myDFPlayer.play(5);
+    }
+}
+
+void playWarningSound()
+{
+    if (micros() - lastWarningError > warningErrorInterval)
+    {
+        lastWarningError = micros();
+
+        myDFPlayer.pause();
+        myDFPlayer.play(7);
+    }
+}
+
+void playErrorSound()
+{
+    if (micros() - lastWarningError > warningErrorInterval)
+    {
+        lastWarningError = micros();
+
+        myDFPlayer.pause();
+        myDFPlayer.play(8);
     }
 }
 
