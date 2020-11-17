@@ -8,6 +8,11 @@ volatile bool ultrasonicInterruptCalled = false;
 int ultrasonicDistances[ultrasonicSensorQuantity]; // array of most recent ultrasonic distance reads
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+// For TOF10120                                                                                        //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+int tofReadDistance = 0;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
 // END GLOBAL VARS                                                                                     //
 // ///////////////                                                                                     //
@@ -50,8 +55,9 @@ void getDistances()
 
     // Get best Front-Center distance
     frontMiddleDistance = ultrasonicDistances[0];
-    if (tofReadDistance < middleDistance)
+    if (tofReadDistance < frontMiddleDistance)
     {
+        Serial.println(tofReadDistance);
         frontMiddleDistance = tofReadDistance;
     }
     if (irProxValueFC == 0)

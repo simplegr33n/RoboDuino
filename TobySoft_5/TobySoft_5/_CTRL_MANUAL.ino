@@ -4,7 +4,7 @@
 void manualControl()
 {
     // check RF switch for AutoPilot toggle
-    if ((dataFromTransmitter[2] == 0) && (micros() - lastAutoPilotToggle > toggleDebounce))
+    if ((dataFromTransmitter[2] == 1) && (micros() - lastAutoPilotToggle > toggleDebounce))
     {
         toggleAutoPilot();
         return;

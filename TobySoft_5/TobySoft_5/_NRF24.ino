@@ -43,7 +43,7 @@ void radioLink()
 
         // // DEBUG
         // Serial.println("data received (");
-        Serial.print(dataFromTransmitter[0]);
+//        Serial.print(dataFromTransmitter[0]);
         // Serial.print(", ");
         // Serial.print(dataFromTransmitter[1]);
         // Serial.print(", ");
