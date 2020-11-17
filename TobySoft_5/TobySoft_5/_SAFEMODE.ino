@@ -4,7 +4,6 @@
 // FORWARD
 bool checkFowardSafety()
 {
-
     // Get best Front-Left distance
     int leftDistance = ultrasonicDistances[1];
     if (irProxValueFL == 0)
@@ -35,6 +34,7 @@ bool checkFowardSafety()
         BLOCKED_DRIVE_COUNT = 0;
         return true;
     }
+
     BLOCKED_DRIVE_COUNT++;
     return false;
 }
@@ -42,7 +42,7 @@ bool checkFowardSafety()
 // STOP
 bool checkStopSafety()
 {
-    Serial.println("No stop safety check yet.");
+    // Serial.println("No stop safety check yet.");
 
     BLOCKED_DRIVE_COUNT = 0;
     return true;
@@ -51,7 +51,7 @@ bool checkStopSafety()
 // REVERSE
 bool checkReverseSafety()
 {
-    Serial.println("No sensors for safety check!");
+    Serial.println("No sensors for reverse safety check!");
 
     BLOCKED_DRIVE_COUNT = 0;
     return true;
@@ -60,7 +60,6 @@ bool checkReverseSafety()
 // LEFT
 bool checkLeftSafety()
 {
-
     // Get best Front-Left distance
     int leftDistance = ultrasonicDistances[1];
     if (irProxValueFL == 0)
@@ -84,6 +83,7 @@ bool checkLeftSafety()
         BLOCKED_DRIVE_COUNT = 0;
         return true;
     }
+
     BLOCKED_DRIVE_COUNT++;
     return false;
 }
@@ -91,7 +91,6 @@ bool checkLeftSafety()
 // RIGHT
 bool checkRightSafety()
 {
-
     // Get best Front-Center distance
     int middleDistance = ultrasonicDistances[0];
     if (tofReadDistance < middleDistance)
@@ -115,6 +114,7 @@ bool checkRightSafety()
         BLOCKED_DRIVE_COUNT = 0;
         return true;
     }
+
     BLOCKED_DRIVE_COUNT++;
     return false;
 }
@@ -124,6 +124,8 @@ bool checkRightSafety()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void toggleSafeMode()
 {
+    playSafeToggleSound();
+
     lastSafeModeToggle = micros();
     driveMotors(0); // stop
     SAFEMODE_ON = !SAFEMODE_ON;

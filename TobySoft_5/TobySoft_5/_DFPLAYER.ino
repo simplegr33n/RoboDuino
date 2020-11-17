@@ -20,13 +20,9 @@
  ****************************************************/
 
 #include "Arduino.h"
-#include "DFRobotDFPlayerMini.h"
 
 #include <HardwareSerial.h>
 
-// HardwareSerial myDFSerial(2);
-
-DFRobotDFPlayerMini myDFPlayer;
 void printDetail(uint8_t type, int value);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +95,34 @@ void initDFPLAYER()
 void playTobyIntroMP3()
 {
     myDFPlayer.play(1);
+}
+
+void playAutoToggleSound()
+{
+    if (AUTOPILOT_ON)
+    {
+        myDFPlayer.pause();
+        myDFPlayer.play(4);
+    }
+    else
+    {
+        myDFPlayer.pause();
+        myDFPlayer.play(3);
+    }
+}
+
+void playSafeToggleSound()
+{
+    if (SAFEMODE_ON)
+    {
+        myDFPlayer.pause();
+        myDFPlayer.play(6);
+    }
+    else
+    {
+        myDFPlayer.pause();
+        myDFPlayer.play(5);
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

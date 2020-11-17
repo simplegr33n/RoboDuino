@@ -54,19 +54,21 @@ void autoControl()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void toggleAutoPilot()
 {
+    playAutoToggleSound();
+    lastAutoPilotToggle = micros();
+
     if (AUTOPILOT_ON)
     {
-        lastAutoPilotToggle = micros();
         driveMotors(0); // stop
         displayLogo();
         AUTOPILOT_ON = false;
+        return;
     }
     else
     {
-        lastAutoPilotToggle = micros();
         driveMotors(0); // stop
-        AUTOPILOT_ON = true;
         displayUltrasonicHeader();
+        AUTOPILOT_ON = true;
+        return;
     }
-    return;
 }

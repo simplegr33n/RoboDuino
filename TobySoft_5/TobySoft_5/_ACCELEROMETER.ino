@@ -19,6 +19,10 @@ bool checkForCollision()
 
     if (((((float)x - 331.5) / 65) > collisionThreshold)) // collision detected!
     {
+        // play warning sound
+        myDFPlayer.pause();
+        myDFPlayer.play(7);
+
         BLOCKED_DRIVE_COUNT++;
         return true; // indicate collision detected
     }
