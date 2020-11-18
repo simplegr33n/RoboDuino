@@ -4,6 +4,12 @@ volatile unsigned long ultrasonicResponseStarts[ultrasonicSensorQuantity];
 volatile unsigned long ultrasonicResponseEnds[ultrasonicSensorQuantity];
 volatile int ultrasonicResponseCount = 0; // trigger history update when ultrasonicResponseCount == ultrasonicSensorQuantity
 
+#define ultrasonicSamples 5
+volatile int ultrasonicSampleFL[ultrasonicSamples];
+volatile int ultrasonicSampleFC[ultrasonicSamples];
+volatile int ultrasonicSampleFR[ultrasonicSamples];
+volatile int ultrasonicSamplesPointer = 0;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
 // END GLOBAL VARS                                                                                     //
@@ -99,20 +105,33 @@ void updateUltrasonicHistory()
     // ultrasonicResponseDurations[2] = ultrasonicResponseEnds[2] - ultrasonicResponseStarts[2];
 
     // Update distances
-    ultrasonicDistances[0] = microsToCentimeters(ultrasonicResponseEnds[0] - ultrasonicResponseStarts[0]);
-    ultrasonicDistances[1] = microsToCentimeters(ultrasonicResponseEnds[1] - ultrasonicResponseStarts[1]);
-    ultrasonicDistances[2] = microsToCentimeters(ultrasonicResponseEnds[2] - ultrasonicResponseStarts[2]);
 
-    // Update recent distances history array
-    A13_History[ultrasonicHistoryPointer] = ultrasonicDistances[0];
-    A14_History[ultrasonicHistoryPointer] = ultrasonicDistances[1];
-    A15_History[ultrasonicHistoryPointer] = ultrasonicDistances[2];
+    ultrasonicSampleFC[ultrasonicSamplesPointer] = (int)microsToCentimeters(ultrasonicResponseEnds[0] - ultrasonicResponseStarts[0]);
+    ultrasonicSampleFL[ultrasonicSamplesPointer] = (int)microsToCentimeters(ultrasonicResponseEnds[1] - ultrasonicResponseStarts[1]);
+    ultrasonicSampleFR[ultrasonicSamplesPointer] = (int)microsToCentimeters(ultrasonicResponseEnds[2] - ultrasonicResponseStarts[2]);
 
-    // Update pointer
-    ultrasonicHistoryPointer++;
-    if (ultrasonicHistoryPointer > 7)
+    // Update sample pointer
+    ultrasonicSamplesPointer++;
+
+    if (ultrasonicSamplesPointer > 4)
     {
-        ultrasonicHistoryPointer = 0;
+        ultrasonicSamplesPointer = 0;
+
+        ultrasonicDistances[0] = ultrasonicArrayAverage(ultrasonicSampleFC);
+        ultrasonicDistances[1] = ultrasonicArrayAverage(ultrasonicSampleFL);
+        ultrasonicDistances[2] = ultrasonicArrayAverage(ultrasonicSampleFR);
+
+        // Update recent distances history array
+        A13_History[ultrasonicHistoryPointer] = ultrasonicDistances[0];
+        A14_History[ultrasonicHistoryPointer] = ultrasonicDistances[1];
+        A15_History[ultrasonicHistoryPointer] = ultrasonicDistances[2];
+
+        // Update history pointer for oled graph
+        ultrasonicHistoryPointer++;
+        if (ultrasonicHistoryPointer > 7)
+        {
+            ultrasonicHistoryPointer = 0;
+        }
     }
 
     // Refresh response starts (todo: loop)
@@ -167,4 +186,19 @@ void triggerSensors(void)
 float microsToCentimeters(long microseconds)
 {
     return (float)microseconds / (29 * 2); // :: (duration [μs]) / (29 [cm/μs] * 2 [return distance])
+}
+
+float ultrasonicArrayAverage(volatile int distances[ultrasonicSamples])
+{
+    int i;
+    int sum = 0;
+    float average = 0.0;
+
+    for (i = 0; i < ultrasonicSamples; i++)
+    {
+        sum = sum + distances[i];
+    }
+    average = sum / (float)ultrasonicSamples;
+
+    return average;
 }

@@ -2,7 +2,7 @@
 // For Ultrasonic                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ultrasonicSensorQuantity 3 // Number of ultrasonic sensors hooked up
-#define ULTRASONIC_INTERVAL 20000  // needs some tuning (30000 perhaps minimum)
+#define ULTRASONIC_INTERVAL 30000  // needs some tuning (30000 perhaps minimum)
 unsigned long lastUltrasonicTrigger = 0;
 volatile bool ultrasonicInterruptCalled = false;
 int ultrasonicDistances[ultrasonicSensorQuantity]; // array of most recent ultrasonic distance reads

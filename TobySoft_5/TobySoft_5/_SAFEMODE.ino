@@ -17,7 +17,7 @@ bool checkFowardSafety()
 // LEFT
 bool checkLeftSafety()
 {
-    if ((frontLeftDistance > 15) && (irDropValueFL == 0))
+    if ((frontLeftDistance > 10) && (irDropValueFL == 0))
     {
         return true;
     }
@@ -27,7 +27,7 @@ bool checkLeftSafety()
 // RIGHT
 bool checkRightSafety()
 {
-    if ((frontRightDistance > 15) && (irDropValueFR == 0))
+    if ((frontRightDistance > 10) && (irDropValueFR == 0))
     {
         return true;
     }

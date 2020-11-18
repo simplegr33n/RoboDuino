@@ -1,10 +1,15 @@
 int middleDistance, leftDistance, rightDistance;
 
-#define autoPilotDecisionInterval 40000
+#define autoPilotDecisionInterval 100000
 unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
 
 int evadeTryCount = 0;
 int evadeLoopCount = 0;
+
+bool tryEvadeRight = false;
+
+#define clearSailingAuto 100 // threshold of clearAutoSamples for moving forward
+int clearAutoSamples = clearSailingAuto;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -26,53 +31,95 @@ void autoControl()
 
     if ((micros() - lastPilotDecision > autoPilotDecisionInterval))
     {
-
-        if ((advancedFunctionStart != 0) || (checkFowardSafety() == false))
+        if (checkFowardSafety() == false)
         {
+            clearAutoSamples = 0;
             tryEvade();
         }
         else
         {
-            clearAdvancedFunctions();
-            driveMotors(1); // go forward
+            clearAutoSamples++;
+            if (clearAutoSamples > clearSailingAuto * 2)
+            {
+                clearAutoSamples = clearSailingAuto + 1;
+            }
+
+            if ((advancedFunctionStart == 0) || (clearAutoSamples >= clearSailingAuto))
+            {
+                clearAdvancedFunctions();
+                driveMotors(1); // go forward
+            }
+            else
+            {
+                tryEvade();
+            }
         }
     }
 }
 
 void tryEvade()
 {
-    Serial.println("NEW EVADE!");
-
     switch (evadeTryCount)
     {
-    case 0: // Try left Clearing Search
-        Serial.println("evade: FCL");
-        findClearLeft();
+    case 0: // Try left/right Clearing Search
+        if (tryEvadeRight)
+        {
+            if (checkRightSafety())
+            {
+                Serial.println("evade: FCR");
+                findClearRight();
+                return;
+            }
+            if (checkLeftSafety())
+            {
+                Serial.println("evade: FCL");
+                findClearLeft();
+                return;
+            }
+            else
+            {
+                evadeTryCount++;
+            }
+        }
+        else
+        {
+            if (checkLeftSafety())
+            {
+                Serial.println("evade: FCL");
+                findClearLeft();
+                return;
+            }
+            else if (checkRightSafety())
+            {
+                Serial.println("evade: FCR");
+                findClearRight();
+                return;
+            }
+            else
+            {
+                evadeTryCount++;
+            }
+        }
+
         break;
-    case 1: // Try backing to the left
-        Serial.println("evade: BTL");
-        backLeftEvade();
-        break;
-    case 2: // Try right Clearing Search
-        Serial.println("evade: FCR");
-        findClearRight();
-        break;
-    case 3: // Try backing to the right
-        Serial.println("evade: BTR");
-        backRightEvade();
+    case 1: // Try backing up
+        Serial.println("evade: BU");
+        backUpEvade();
         break;
     default:
         evadeLoopCount++;
-        if (evadeLoopCount > 99)
+        if (evadeLoopCount > 500)
         {
             stopDrive(0);
-            playSleepSound();
-            delay(7000); // delays are bad.. but so is getting here
+            evadeLoopCount = 0;
+            evadeTryCount = 0;
+            toggleAutoPilot();
             break;
         }
         else
         {
             evadeTryCount = 0;
+            tryEvadeRight != tryEvadeRight;
         }
         break;
     }

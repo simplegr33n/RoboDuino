@@ -6,7 +6,7 @@
 #define MOTOR_IN4 11
 #define MOTOR_ENA 6
 
-#define carSpeed 140
+#define carSpeed 200
 
 // Advanced function variables
 #define fullTurn160 3000000 // millis duration for a 360 degree turn at 160 speed
@@ -15,8 +15,7 @@ bool adv_rightDegrees = false;
 bool adv_leftDegrees = false;
 bool adv_findOpenRight = false;
 bool adv_findOpenLeft = false;
-bool adv_backRightEvade = false;
-bool adv_backLeftEvade = false;
+bool adv_backUpEvade = false;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
@@ -41,94 +40,53 @@ void initDriveMotors()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void driveMotors(int direction)
 {
-    if (AUTOPILOT_ON || SAFEMODE_ON)
+    // Advanced Drive functions
+    if (adv_rightDegrees)
     {
-        // Advanced Drive functions
-        if (adv_rightDegrees)
-        {
-            rightDegrees(adv_turnDegrees);
-            return;
-        }
-        if (adv_leftDegrees)
-        {
-            leftDegrees(adv_turnDegrees);
-            return;
-        }
-        if (adv_findOpenRight)
-        {
-            findClearRight();
-            return;
-        }
-        if (adv_findOpenLeft)
-        {
-            findClearLeft();
-            return;
-        }
-
-        if (checkForCollision())
-        {
-            return; // ignore basic instructions to motors if collision detected
-        }
-
-        // Basic Drive functions
-        switch (direction)
-        {
-        case 0: // Stop
-            if (checkStopSafety())
-            {
-                stopDrive(0);
-            }
-            break;
-        case 1: // Forward
-            if (checkFowardSafety())
-            {
-                forwardDrive(carSpeed);
-            }
-            break;
-        case -1: // Reverse
-            if (checkReverseSafety())
-            {
-                reverseDrive(carSpeed);
-            }
-            break;
-        case 2: // Left
-            if (checkLeftSafety())
-            {
-                leftDrive(carSpeed);
-            }
-            break;
-        case 3: // Right
-            if (checkRightSafety())
-            {
-                rightDrive(carSpeed);
-            }
-            break;
-        default:
-            break;
-        }
+        rightDegrees(adv_turnDegrees);
+        return;
     }
-    else // Free control mode
+    if (adv_leftDegrees)
     {
-        switch (direction)
-        {
-        case 0: // Stop
-            stopDrive(0);
-            break;
-        case 1: // Forward
-            forwardDrive(carSpeed);
-            break;
-        case -1: // Reverse
-            reverseDrive(carSpeed);
-            break;
-        case 2: // Left
-            leftDrive(carSpeed);
-            break;
-        case 3: // Right
-            rightDrive(carSpeed);
-            break;
-        default:
-            break;
-        }
+        leftDegrees(adv_turnDegrees);
+        return;
+    }
+    if (adv_findOpenRight)
+    {
+        findClearRight();
+        return;
+    }
+    if (adv_findOpenLeft)
+    {
+        findClearLeft();
+        return;
+    }
+    if (adv_backUpEvade)
+    {
+        backUpEvade();
+        return;
+    }
+
+    // Basic Drive functions
+    switch (direction)
+    {
+    case 0: // Stop
+        stopDrive(0);
+        break;
+    case 1: // Forward
+        forwardDrive(carSpeed);
+        break;
+    case -1: // Reverse
+        reverseDrive(carSpeed);
+        break;
+    case 2: // Left
+        leftDrive(carSpeed);
+        break;
+    case 3: // Right
+        rightDrive(carSpeed);
+        break;
+    default:
+        break;
     }
 }
 
@@ -138,52 +96,154 @@ void driveMotors(int direction)
 void forwardDrive(int speed)
 {
     DRIVE_INSTRUCTION = "FORWARD";
-    analogWrite(MOTOR_ENA, speed);
-    analogWrite(MOTOR_ENB, speed);
-    digitalWrite(MOTOR_IN1, HIGH);
-    digitalWrite(MOTOR_IN2, LOW);
-    digitalWrite(MOTOR_IN3, LOW);
-    digitalWrite(MOTOR_IN4, HIGH);
+
+    if (AUTOPILOT_ON || SAFEMODE_ON)
+    {
+        if (checkForCollision())
+        {
+            return; // ignore basic instructions to motors if collision detected
+        }
+
+        if (checkFowardSafety())
+        {
+            analogWrite(MOTOR_ENA, speed);
+            analogWrite(MOTOR_ENB, speed);
+            digitalWrite(MOTOR_IN1, HIGH);
+            digitalWrite(MOTOR_IN2, LOW);
+            digitalWrite(MOTOR_IN3, LOW);
+            digitalWrite(MOTOR_IN4, HIGH);
+        }
+    }
+    else
+    {
+        analogWrite(MOTOR_ENA, speed);
+        analogWrite(MOTOR_ENB, speed);
+        digitalWrite(MOTOR_IN1, HIGH);
+        digitalWrite(MOTOR_IN2, LOW);
+        digitalWrite(MOTOR_IN3, LOW);
+        digitalWrite(MOTOR_IN4, HIGH);
+    }
 }
 
 void reverseDrive(int speed)
 {
     DRIVE_INSTRUCTION = "REVERSE";
-    analogWrite(MOTOR_ENA, speed);
-    analogWrite(MOTOR_ENB, speed);
-    digitalWrite(MOTOR_IN1, LOW);
-    digitalWrite(MOTOR_IN2, HIGH);
-    digitalWrite(MOTOR_IN3, HIGH);
-    digitalWrite(MOTOR_IN4, LOW);
+
+    if (AUTOPILOT_ON || SAFEMODE_ON)
+    {
+        if (checkForCollision())
+        {
+            return; // ignore basic instructions to motors if collision detected
+        }
+
+        if (checkReverseSafety())
+        {
+            analogWrite(MOTOR_ENA, speed);
+            analogWrite(MOTOR_ENB, speed);
+            digitalWrite(MOTOR_IN1, LOW);
+            digitalWrite(MOTOR_IN2, HIGH);
+            digitalWrite(MOTOR_IN3, HIGH);
+            digitalWrite(MOTOR_IN4, LOW);
+        }
+    }
+    else
+    {
+        analogWrite(MOTOR_ENA, speed);
+        analogWrite(MOTOR_ENB, speed);
+        digitalWrite(MOTOR_IN1, LOW);
+        digitalWrite(MOTOR_IN2, HIGH);
+        digitalWrite(MOTOR_IN3, HIGH);
+        digitalWrite(MOTOR_IN4, LOW);
+    }
 }
 
 void leftDrive(int speed)
 {
     DRIVE_INSTRUCTION = "LEFT";
-    analogWrite(MOTOR_ENA, speed);
-    analogWrite(MOTOR_ENB, speed);
-    digitalWrite(MOTOR_IN1, LOW);
-    digitalWrite(MOTOR_IN2, HIGH);
-    digitalWrite(MOTOR_IN3, LOW);
-    digitalWrite(MOTOR_IN4, HIGH);
+
+    if (AUTOPILOT_ON || SAFEMODE_ON)
+    {
+        if (checkForCollision())
+        {
+            return; // ignore basic instructions to motors if collision detected
+        }
+
+        if (checkLeftSafety())
+        {
+            analogWrite(MOTOR_ENA, speed);
+            analogWrite(MOTOR_ENB, speed);
+            digitalWrite(MOTOR_IN1, LOW);
+            digitalWrite(MOTOR_IN2, HIGH);
+            digitalWrite(MOTOR_IN3, LOW);
+            digitalWrite(MOTOR_IN4, HIGH);
+        }
+    }
+    else
+    {
+        analogWrite(MOTOR_ENA, speed);
+        analogWrite(MOTOR_ENB, speed);
+        digitalWrite(MOTOR_IN1, LOW);
+        digitalWrite(MOTOR_IN2, HIGH);
+        digitalWrite(MOTOR_IN3, LOW);
+        digitalWrite(MOTOR_IN4, HIGH);
+    }
 }
 
 void rightDrive(int speed)
 {
     DRIVE_INSTRUCTION = "RIGHT";
-    analogWrite(MOTOR_ENA, speed);
-    analogWrite(MOTOR_ENB, speed);
-    digitalWrite(MOTOR_IN1, HIGH);
-    digitalWrite(MOTOR_IN2, LOW);
-    digitalWrite(MOTOR_IN3, HIGH);
-    digitalWrite(MOTOR_IN4, LOW);
+
+    if (AUTOPILOT_ON || SAFEMODE_ON)
+    {
+        if (checkForCollision())
+        {
+            return; // ignore basic instructions to motors if collision detected
+        }
+
+        if (checkRightSafety())
+        {
+            analogWrite(MOTOR_ENA, speed);
+            analogWrite(MOTOR_ENB, speed);
+            digitalWrite(MOTOR_IN1, HIGH);
+            digitalWrite(MOTOR_IN2, LOW);
+            digitalWrite(MOTOR_IN3, HIGH);
+            digitalWrite(MOTOR_IN4, LOW);
+        }
+    }
+    else
+    {
+
+        analogWrite(MOTOR_ENA, speed);
+        analogWrite(MOTOR_ENB, speed);
+        digitalWrite(MOTOR_IN1, HIGH);
+        digitalWrite(MOTOR_IN2, LOW);
+        digitalWrite(MOTOR_IN3, HIGH);
+        digitalWrite(MOTOR_IN4, LOW);
+    }
 }
 
 void stopDrive(int speed) // TODO: speed argument applies a small reverse/delay() if not 0, in case of sudden stop at dropoff
 {
     DRIVE_INSTRUCTION = "STOP";
-    digitalWrite(MOTOR_ENA, LOW);
-    digitalWrite(MOTOR_ENB, LOW);
+
+    if (AUTOPILOT_ON || SAFEMODE_ON)
+    {
+        if (checkForCollision())
+        {
+            return; // ignore basic instructions to motors if collision detected
+        }
+
+        if (checkStopSafety())
+        {
+            digitalWrite(MOTOR_ENA, LOW);
+            digitalWrite(MOTOR_ENB, LOW);
+        }
+    }
+    else
+    {
+        digitalWrite(MOTOR_ENA, LOW);
+        digitalWrite(MOTOR_ENB, LOW);
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,21 +317,58 @@ void findClearLeft()
     }
     else
     {
-        if (micros() - advancedFunctionStart > fullTurn160) // give up after a full rotation without a clearing
-        {
-            evadeTryCount++;
-            clearAdvancedFunctions();
-            playErrorSound();
-        }
         if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
         {
-            leftDrive(160);
+            if (micros() - advancedFunctionStart < fullTurn160 / 6)
+            {
+                leftDrive(160);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 5)
+            {
+                stopDrive(0);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 4)
+            {
+                leftDrive(160);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 3)
+            {
+                stopDrive(0);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 2)
+            {
+                leftDrive(160);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 1)
+            {
+                stopDrive(0);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < (fullTurn160 + (fullTurn160 / 6)))
+            {
+                leftDrive(160);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < (fullTurn160 + (fullTurn160 / 5)))
+            {
+                stopDrive(0);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < (fullTurn160 + (fullTurn160 / 4)))
+            {
+                leftDrive(160);
+                return;
+            }
         }
-        else
-        {
-            evadeTryCount++;
-            clearAdvancedFunctions();
-        }
+
+        evadeTryCount++;
+        clearAdvancedFunctions();
+        playErrorSound();
     }
 }
 
@@ -291,102 +388,124 @@ void findClearRight()
     }
     else
     {
-        if (micros() - advancedFunctionStart > fullTurn160) // give up after a full rotation without a clearing
-        {
-            evadeTryCount++;
-            clearAdvancedFunctions();
-            playErrorSound();
-        }
-
         if (frontMiddleDistance < 20 || frontLeftDistance < 10 || frontRightDistance < 10)
         {
-            rightDrive(160);
-        }
-        else
-        {
-            evadeTryCount++;
-            clearAdvancedFunctions();
-        }
-    }
-}
-
-void backLeftEvade()
-{
-    if (advancedFunctionStart == 0)
-    {
-        advancedFunctionStart = micros();
-        adv_backLeftEvade = true;
-    }
-    else
-    {
-        if (micros() - advancedFunctionStart < 500000)
-        {
-            reverseDrive(140);
-            return;
-        }
-        else if ((micros() - advancedFunctionStart > 500000) && (micros() - advancedFunctionStart < (500000 + (fullTurn160 / 3))))
-        {
-            if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkLeftSafety() == false))
-            {
-                evadeTryCount++;
-                clearAdvancedFunctions();
-                playWarningSound();
-            }
-            else
-            {
-                leftDrive(160);
-            }
-        }
-        else
-        {
-            evadeTryCount++;
-            clearAdvancedFunctions();
-        }
-    }
-}
-
-void backRightEvade()
-{
-    if (advancedFunctionStart == 0)
-    {
-        advancedFunctionStart = micros();
-        adv_backRightEvade = true;
-    }
-    else
-    {
-        if (micros() - advancedFunctionStart < 500000)
-        {
-            reverseDrive(140);
-            return;
-        }
-        else if ((micros() - advancedFunctionStart > 500000) && (micros() - advancedFunctionStart < (500000 + (fullTurn160 / 3))))
-        {
-            if ((AUTOPILOT_ON || SAFEMODE_ON) && (checkRightSafety() == false))
-            {
-                evadeTryCount++;
-                clearAdvancedFunctions();
-                playWarningSound();
-            }
-            else
+            if (micros() - advancedFunctionStart < fullTurn160 / 6)
             {
                 rightDrive(160);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 5)
+            {
+                stopDrive(0);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 4)
+            {
+                rightDrive(160);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 3)
+            {
+                stopDrive(0);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 2)
+            {
+                rightDrive(160);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < fullTurn160 / 1)
+            {
+                stopDrive(0);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < (fullTurn160 + (fullTurn160 / 6)))
+            {
+                rightDrive(160);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < (fullTurn160 + (fullTurn160 / 5)))
+            {
+                stopDrive(0);
+                return;
+            }
+            else if (micros() - advancedFunctionStart < (fullTurn160 + (fullTurn160 / 4)))
+            {
+                rightDrive(160);
+                return;
             }
         }
-        else
+
+        evadeTryCount++;
+        clearAdvancedFunctions();
+        playErrorSound();
+    }
+}
+
+void backUpEvade()
+{
+    if (advancedFunctionStart == 0)
+    {
+        advancedFunctionStart = micros();
+        adv_backUpEvade = true;
+    }
+    else
+    {
+        if (micros() - advancedFunctionStart < 200000)
         {
-            evadeTryCount++;
-            clearAdvancedFunctions();
+            reverseDrive(140);
+            return;
         }
+        else if (micros() - advancedFunctionStart < 500000)
+        {
+            rightDrive(160);
+            return;
+        }
+        else if (micros() - advancedFunctionStart < 700000)
+        {
+            reverseDrive(140);
+            return;
+        }
+        else if (micros() - advancedFunctionStart < 1000000)
+        {
+            leftDrive(160);
+            return;
+        }
+        else if (micros() - advancedFunctionStart < 1200000)
+        {
+            reverseDrive(140);
+            return;
+        }
+        else if (micros() - advancedFunctionStart < 1700000)
+        {
+            rightDrive(160);
+            return;
+        }
+        else if (micros() - advancedFunctionStart < 2000000)
+        {
+            reverseDrive(140);
+            return;
+        }
+        else if (micros() - advancedFunctionStart < 2300000)
+        {
+            leftDrive(160);
+            return;
+        }
+
+        evadeTryCount++;
+        clearAdvancedFunctions();
+        playErrorSound();
     }
 }
 
 void clearAdvancedFunctions()
 {
+    stopDrive(0);
     advancedFunctionStart = 0;
     adv_rightDegrees = false;
     adv_leftDegrees = false;
     adv_findOpenRight = false;
     adv_findOpenLeft = false;
-    adv_backRightEvade = false;
-    adv_backLeftEvade = false;
+    adv_backUpEvade = false;
 }
