@@ -22,27 +22,27 @@ Beyond having 4 hardware Serial ports to the Uno's 1, other advantages to the Me
 
 ## Uno Pinout
 
-| Pin             | _sensor_       | _sensor pin_ | _notes_                                   |
-| --------------- | -------------- | ------------ | ----------------------------------------- |
-| **_A0_**        |                |              |
-| **_A1_**        | Accelerometer  | _X-Axis_     |
-| **_A2_**        |                |              |
-| **_A3_**        |                |              |
-| **_A4_** _II2C_ | OLED (SSD1306) | _SDA_        |
-|                 | TOF10120       | _SDA_        |
-| **_A5_** _II2C_ | OLED (SSD1306) | _SCL_        |
-|                 | TOF10120       | _SCL_        |
-| **_D0_** _(TX)_ | DFR0299        | _RX_         | use of 1k resistor to reduce noise        |
-| **_D1_** _(RX)_ | DFR0299        | _TX_         |
-| **_D2_**        | Left SR04      | _Echo_       | pin change interrupt used for echo timing |
-| **_D3_**        | Center SR04    | _Echo_       | pin change interrupt used for echo timing |
-| **_D4_**        | Right SR04     | _Echo_       | pin change interrupt used for echo timing |
-| **_D5_**        | L298N          |              |
-| **_D6_**        | L298N          |              |
-| **_D7_**        | L298N          |              |
-| **_D8_**        | L298N          |              |
-| **_D9_**        | L298N          |              |
-| **_D10_**       | SR04 Trigger   | _Trig_       | single trigger pin for all SR04s          |
-| **_D11_**       | L298N          |              |
-| **_D12_**       | IR Receiver    | _Out_        |
-| **_D13_**       | Onboard LED    |              |
+| Pin               | _sensor_       | _sensor pin_ | _notes_                                   |
+| ----------------- | -------------- | ------------ | ----------------------------------------- |
+| **_A0_**          |                |              |
+| **_A1_**          | Accelerometer  | _X-Axis_     |
+| **_A2_**          |                |              |
+| **_A3_**          |                |              |
+| **_A4_** - _II2C_ | OLED (SSD1306) | _SDA_        |
+|                   | TOF10120       | _SDA_        |
+| **_A5_** - _II2C_ | OLED (SSD1306) | _SCL_        |
+|                   | TOF10120       | _SCL_        |
+| **_D0_** - _(TX)_ | DFR0299        | _RX_         | use of 1k resistor to reduce noise        |
+| **_D1_** - _(RX)_ | DFR0299        | _TX_         |
+| **_D2_**          | Left SR04      | _Echo_       | pin change interrupt used for echo timing |
+| **_D3_**          | Center SR04    | _Echo_       | pin change interrupt used for echo timing |
+| **_D4_**          | Right SR04     | _Echo_       | pin change interrupt used for echo timing |
+| **_D5_**          | L298N          |              |
+| **_D6_**          | L298N          |              |
+| **_D7_**          | L298N          |              |
+| **_D8_**          | L298N          |              |
+| **_D9_**          | L298N          |              |
+| **_D10_**         | SR04 Trigger   | _Trig_       | single trigger pin for all SR04s          |
+| **_D11_**         | L298N          |              |
+| **_D12_**         | IR Receiver    | _Out_        |
+| **_D13_**         | Onboard LED    |              |
