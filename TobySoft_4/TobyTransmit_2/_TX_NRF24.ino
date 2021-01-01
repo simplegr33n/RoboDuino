@@ -40,12 +40,12 @@ void sendRadioCom()
     if (millis() - prevMillis > txIntervalMillis)
     {
         prevMillis = millis();
-        sendToToby();
+        sendTxData();
         updateDisplay(); // update OLED
     }
 }
 
-void sendToToby()
+void sendTxData()
 {
     int transmitData[4] = {joystick0ValueX, joystick0ValueY, joystick0ValueSw, bigRedButtonValue}; // needs to match datatype/size set up to be received on other end
 

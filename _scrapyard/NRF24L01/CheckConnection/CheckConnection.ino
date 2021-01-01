@@ -10,8 +10,8 @@
 
 #include <printf.h>
 
-#define CE_PIN   48
-#define CSN_PIN 49
+#define CE_PIN 9
+#define CSN_PIN 10
 
 const byte thisSlaveAddress[5] = {'R','x','A','A','A'};
 
@@ -24,6 +24,8 @@ bool newData = false;
 void setup() {
     Serial.begin(9600);
     printf_begin();
+
+    pinMode(CSN_PIN, OUTPUT);
 
     Serial.println("CheckConnection Starting");
     Serial.println();

@@ -62,7 +62,7 @@ void loop()
     if (millis() - prevMillis > txIntervalMillis)
     {
         prevMillis = millis();
-        sendToToby();
+        sendTxData();
         updateDisplay(); // update OLED
     }
 }
@@ -71,7 +71,7 @@ void loop()
 // Transmit Functions                                                                                  //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void sendToToby()
+void sendTxData()
 {
     int xPotValue = analogRead(X_PIN);
     xAngleValue = map(xPotValue, 0, 1023, 0, 180);

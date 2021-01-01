@@ -62,7 +62,7 @@ void displayInitSequence(void)
     delay(1000); // show for 1 seconds
 }
 
-void updateDisplay()
+void updateHomeScreen()
 {
     display.clearDisplay();
 
