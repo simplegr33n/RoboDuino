@@ -2,6 +2,10 @@
 
 _Adventures in Arduino controlled robotics_
 
+## TobySoft 6.0
+
+[<img src="https://raw.githubusercontent.com/simplegr33n/RoboDuino/master/_assets/TS6.png" width="400">](https://github.com/simplegr33n/RoboDuino/tree/master/TobySoft_6)
+
 ## TobySoft 5.0
 
 For the Arduino Mega. Time to get a camera on board, refine the armor, and look to start figuring Wifi-to-RF control and the NVIDIA Jetson Nano... which may completely derail this project when it arrives.
