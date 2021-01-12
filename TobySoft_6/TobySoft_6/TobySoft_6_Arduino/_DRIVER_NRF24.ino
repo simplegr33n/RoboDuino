@@ -2,10 +2,7 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define CE_PIN 9
-#define CSN_PIN 10
-
-RF24 radio(CE_PIN, CSN_PIN); // create a radio
+RF24 radio(NRF_CE_PIN, NRF_CSN_PIN); // create a radio
 
 const byte thisSlaveAddress[5] = {'R', 'x', 'T', 'B', '0'};
 
@@ -13,15 +10,18 @@ unsigned long lastSuccessfulRadioRead = 0;
 int ackData[4] = {0, 0, 0, 0}; // the values to be sent to the RF Transmitter, init 0 for now
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ///////////////                                                                                     //
-// END GLOBAL VARS                                                                                     //
-// ///////////////                                                                                     //
+//                                     ///////////////                                                 //
+//                                     END GLOBAL VARS                                                 //
+//                                     ///////////////                                                 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ======================================== INIT ===================================================== //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 void initNRF24()
 {
     Serial.println("TobySoft RF Transmit Link initiating");
     radio.begin();
+    radio.setPALevel(RF24_PA_MAX);
     radio.setDataRate(RF24_250KBPS);
     radio.openReadingPipe(1, thisSlaveAddress);
     radio.enableAckPayload();
@@ -47,24 +47,24 @@ void radioLink()
             dataFromTransmitter[2] = -1;
             dataFromTransmitter[3] = -1;
 
-            // DEBUG
-//            Serial.println("No RF Connection");
+            // // DEBUG
+            //    Serial.println("No RF Connection");
         }
         else
         {
             lastSuccessfulRadioRead = millis();
             updateRadioReplyData();
 
-            // DEBUG
-//            Serial.print("data received (");
-//            Serial.print(dataFromTransmitter[0]);
-//            Serial.print(", ");
-//            Serial.print(dataFromTransmitter[1]);
-//            Serial.print(", ");
-//            Serial.print(dataFromTransmitter[2]);
-//            Serial.print(", ");
-//            Serial.print(dataFromTransmitter[3]);
-//            Serial.println(")");
+            // // DEBUG
+            //    Serial.print("data received (");
+            //    Serial.print(dataFromTransmitter[0]);
+            //    Serial.print(", ");
+            //    Serial.print(dataFromTransmitter[1]);
+            //    Serial.print(", ");
+            //    Serial.print(dataFromTransmitter[2]);
+            //    Serial.print(", ");
+            //    Serial.print(dataFromTransmitter[3]);
+            //    Serial.println(")");
         }
     }
     else
@@ -77,7 +77,7 @@ void radioLink()
             dataFromTransmitter[3] = -1;
 
             // DEBUG
-//            Serial.println("No RF Connection");
+            //    Serial.println("No RF Connection");
         }
     }
 }

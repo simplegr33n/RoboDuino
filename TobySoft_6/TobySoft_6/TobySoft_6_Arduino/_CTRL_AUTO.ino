@@ -1,22 +1,20 @@
-int middleDistance, leftDistance, rightDistance;
+#define autoPilotDecisionInterval 100 // millis
+unsigned long lastPilotDecision = 0;  // micros() timestamp of last autoPilotDecision
 
-#define autoPilotDecisionInterval 100000
-unsigned long lastPilotDecision = 0; // micros() timestamp of last autoPilotDecision
+int autoPilotSpeed = 75; // 0-255, constant speed in autoPilot for now
+int autoPilotTurnSpeed = 160;
+#define halfTurn160 1250 // millis duration for a 180 degree turn at 160 speed
 
-int evadeTryCount = 0;
-int evadeLoopCount = 0;
-
-bool tryEvadeRight = false;
-
-#define clearSailingAuto 100 // threshold of clearAutoSamples for moving forward
-int clearAutoSamples = clearSailingAuto;
+int DRIVE_PATH;
+unsigned long DRIVE_PATH_START;
+float DRIVE_PATH_PROPORTION; // proportion of a full advance/reverse unit or portion of a 180degree turn
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ///////////////                                                                                     //
 // END GLOBAL VARS                                                                                     //
 // ///////////////                                                                                     //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Auto-Pilot functions                                                                                //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,120 +27,177 @@ void autoControl()
         return;
     }
 
-    if ((micros() - lastPilotDecision > autoPilotDecisionInterval))
+    if ((millis() - lastPilotDecision > autoPilotDecisionInterval))
     {
-        if (checkFowardSafety() == false)
+        getDistances(); // A re-call (within main loop) to getDistances before acting, for more precise read of world state
+
+        if (DRIVE_PATH == 0)
         {
-            clearAutoSamples = 0;
-            tryEvade();
+            autoChoosePath(); // Choose your fate, robot.
         }
         else
         {
-            clearAutoSamples++;
-            if (clearAutoSamples > clearSailingAuto * 2)
-            {
-                clearAutoSamples = clearSailingAuto + 1;
-            }
-
-            if ((advancedFunctionStart == 0) || (clearAutoSamples >= clearSailingAuto))
-            {
-                clearAdvancedFunctions();
-                driveMotors(1, autoPilotSpeed); // go forward
-            }
-            else
-            {
-                tryEvade();
-            }
+            autoPursuePath();
         }
     }
 }
 
-void tryEvade()
+void autoChoosePath()
 {
-    switch (evadeTryCount)
-    {
-    case 0: // Try left/right Clearing Search
-//        if (tryEvadeRight)
-//        {
-            if (checkRightSafety())
-            {
-                Serial.println("evade: FCR");
-                findClearRight();
-                return;
-            }
-            if (checkLeftSafety())
-            {
-                Serial.println("evade: FCL");
-                findClearLeft();
-                return;
-            }
-            else
-            {
-                evadeTryCount++;
-            }
-//        }
-//        else
-//        {
-//            if (checkLeftSafety())
-//            {
-//                Serial.println("evade: FCL");
-//                findClearLeft();
-//                return;
-//            }
-//            else if (checkRightSafety())
-//            {
-//                Serial.println("evade: FCR");
-//                findClearRight();
-//                return;
-//            }
-//            else
-//            {
-//                evadeTryCount++;
-//            }
-//        }
+    stopDrive(0);
+    DRIVE_PATH = random(1, 11);
+    DRIVE_PATH_PROPORTION = (float)random(1, 10) / 10;
+}
 
-        break;
-    case 1: // Try backing up
-        Serial.println("evade: BU");
-        backUpEvade();
-        break;
-    default:
-        evadeLoopCount++;
-        if (evadeLoopCount > 500)
-        {
-            stopDrive(0);
-            evadeLoopCount = 0;
-            evadeTryCount = 0;
-            toggleAutoPilot();
-            break;
-        }
-        else
-        {
-            evadeTryCount = 0;
-            tryEvadeRight != tryEvadeRight;
-        }
-        break;
+void autoPursuePath()
+{
+    if (DRIVE_PATH < 6)
+    {
+        // try forward
+        autoDriveForward();
+    }
+    else if (DRIVE_PATH == 6 || DRIVE_PATH == 8)
+    {
+        // try right
+        autoDriveRight();
+    }
+    else if (DRIVE_PATH == 7 || DRIVE_PATH == 9)
+    {
+        // try left
+        autoDriveLeft();
+    }
+    else if (DRIVE_PATH > 9)
+    {
+        //try reverse... maybe stop first.
+        autoDriveBack();
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Toggle function                                                                                     //
+// Advanced Driving functions                                                                          //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void autoDriveForward()
+{
+    if (checkForwardSafety() == false)
+    {
+        clearDrivePath();
+    }
+
+    if (DRIVE_PATH_START == 0)
+    {
+        DRIVE_PATH_START = millis();
+    }
+    else
+    {
+        if (millis() - DRIVE_PATH_START < ((int)(5000 * DRIVE_PATH_PROPORTION)))
+        {
+            forwardDrive(autoPilotSpeed);
+            return;
+        }
+
+        clearDrivePath();
+    }
+}
+
+void autoDriveBack()
+{
+    if (checkReverseSafety() == false)
+    {
+        clearDrivePath();
+    }
+
+    if (DRIVE_PATH_START == 0)
+    {
+        DRIVE_PATH_START = millis();
+    }
+    else
+    {
+        if (millis() - DRIVE_PATH_START < ((int)(1000 * DRIVE_PATH_PROPORTION)))
+        {
+            reverseDrive(autoPilotSpeed);
+            return;
+        }
+
+        clearDrivePath();
+    }
+}
+
+void autoDriveLeft()
+{
+    if (checkLeftSafety() == false)
+    {
+        clearDrivePath();
+    }
+
+    if (DRIVE_PATH_START == 0)
+    {
+        DRIVE_PATH_START = millis();
+    }
+    else
+    {
+        if (millis() - DRIVE_PATH_START < ((int)(halfTurn160 * DRIVE_PATH_PROPORTION)))
+        {
+            leftDrive(autoPilotTurnSpeed);
+        }
+        else
+        {
+            clearDrivePath();
+        }
+    }
+}
+
+void autoDriveRight()
+{
+    if (checkRightSafety() == false)
+    {
+        clearDrivePath();
+    }
+
+    if (DRIVE_PATH_START == 0)
+    {
+        DRIVE_PATH_START = millis();
+    }
+    else
+    {
+        if (millis() - DRIVE_PATH_START < ((int)(halfTurn160 * DRIVE_PATH_PROPORTION)))
+        {
+            rightDrive(autoPilotTurnSpeed);
+        }
+        else
+        {
+            clearDrivePath();
+        }
+    }
+}
+
+// Clear relevant path variables to allow for a new path choice and pursuit
+void clearDrivePath()
+{
+    stopDrive(0);
+    DRIVE_PATH = 0;
+    DRIVE_PATH_START = 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Toggle Autopilot function                                                                           //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void toggleAutoPilot()
 {
-    lastAutoPilotToggle = micros();
+    lastAutoPilotToggle = millis();
 
     if (AUTOPILOT_ON)
     {
-        clearAdvancedFunctions();
+        clearDrivePath();
         driveMotors(0, 0); // stop
         AUTOPILOT_ON = false;
+        turnOnWhiteHeadlights();
         return;
     }
     else
     {
         driveMotors(0, 0); // stop
         AUTOPILOT_ON = true;
+        turnOnGreenHeadlights();
         return;
     }
 }

@@ -1,11 +1,53 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// For Main loop()                                                                                     //
+// Arduino Pin definitions                                                                             //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// L298N Motor Controller
+#define MOTOR_ENA_PIN 5
+#define MOTOR_ENB_PIN 6
+#define MOTOR_IN1_PIN 3
+#define MOTOR_IN2_PIN 4
+#define MOTOR_IN3_PIN 7
+#define MOTOR_IN4_PIN 8
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// NRF24L01+
+#define NRF_CE_PIN 48
+#define NRF_CSN_PIN 49
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Headlights
+#define HEADLIGHT_DATA_PIN 2
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IR-Prox Front sensors
+#define IR_Prox_Pin_FR A0
+#define IR_Prox_Pin_FL A1
+#define IR_Prox_Pin_FCR A2
+#define IR_Prox_Pin_FCL A3
+//// IR-Prox TODO: Side sensors
+// #define IR_Drop_Pin_R ??
+// #define IR_Drop_Pin_L ??
+// IR-Prox Back sensors
+// #define IR_Prox_Pin_BR ??
+// #define IR_Prox_Pin_BL ??
+#define IR_Prox_Pin_BCR A4
+#define IR_Prox_Pin_BCL A5
+//// IR-Prox TODO: Drop sensors
+// #define IR_Drop_Pin_FR ??
+// #define IR_Drop_Pin_FL ??
+// #define IR_Drop_Pin_BR ??
+// #define IR_Drop_Pin_BL ??
+///////////////////
+///////////////////
+// For the SHARP IR
+///////////////////
+#define SHARP_IR_PIN A6
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Main loop() vars                                                                                    //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool SYS_INITIALIZED = false;
-bool AUTOPILOT_ON = true;
-bool SAFEMODE_ON = false;
+bool AUTOPILOT_ON = false;
+bool SAFEMODE_ON = true;
 //
-#define toggleDebounce 500 // half second debounce for rf button toggles
+#define toggleDebounce 1000 // 1 second debounce for rf button toggles
 unsigned long lastAutoPilotToggle, lastSafeModeToggle;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,8 +63,8 @@ int irProxValueFL, irProxValueFCL, irProxValueFCR, irProxValueFR, irProxValueBCL
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For Auto-Pilot                                                                                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+//// TODO: this maybe doing nothing, remove?
 String DRIVE_INSTRUCTION;
-int autoPilotSpeed = 30; // 0-255, constant speed in autoPilot for now
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // For NRF24L01                                                                                        //
@@ -30,48 +72,46 @@ int autoPilotSpeed = 30; // 0-255, constant speed in autoPilot for now
 int dataFromTransmitter[4] = {-1, -1, -1, -1}; // for receive data, must match transmitter datatype/size!
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// For Motor Driver                                                                                    //
+// General                                                                                             //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-unsigned long advancedFunctionStart;
+#define maxSpeed 255 // Max speed (0-255)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// For headlights                                                                                      //
+//                                     ///////////////                                                 //
+//                                     END GLOBAL VARS                                                 //
+//                                     ///////////////                                                 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-#include <FastLED.h>
-#define HEADLIGHTS_NUM 1 // per side
-#define DATA_PIN 2
-// Define the array of leds
-CRGB leds[HEADLIGHTS_NUM];
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ///////////////                                                                                     //
-// END GLOBAL VARS                                                                                     //
-// ///////////////                                                                                     //
+// ======================================== INIT ===================================================== //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void setup()
 {
-  // Set up Serials
-  Serial.begin(9600); // Serial0 - Main debug/USB serial
+  Serial.begin(9600);
+  initializeTobySoft();
+}
 
+void initializeTobySoft()
+{
   Serial.println("TobySoft intializing...");
 
   // Initiate robot systems
-  initDistanceSensors(); // Must init before NRF24L01
+  initProxWatcher(); // Must init before NRF24
   initNRF24();
   initDriveMotors();
-
-  //init headlights:
-  FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds, HEADLIGHTS_NUM);
-  leds[0] = CRGB::White;
-  FastLED.show();
+  initHeadlights();
 
   SYS_INITIALIZED = true;
 }
 
 void loop()
 {
-  // get distances through Distance Harmonizer
+  if (!SYS_INITIALIZED)
+  {
+    initializeTobySoft();
+    return;
+  }
+
+  //  // get distances through Distance Harmonizer
   getDistances();
 
   // check NRF24 for radio instructions

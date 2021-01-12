@@ -6,13 +6,16 @@ void manualControl()
     // Transmitter data re: joystick button
     if ((dataFromTransmitter[2] == 1) && (millis() - lastAutoPilotToggle > toggleDebounce))
     {
-        //toggleAutoPilot();
-        //return;
+        lastAutoPilotToggle = millis();
+        toggleAutoPilot();
+        return;
     }
 
     // Transmitter data re: toggle switch
+    //// TODO: move to options menu
     if ((dataFromTransmitter[3] == 1) && (millis() - lastSafeModeToggle > toggleDebounce))
     {
+        //lastAutoPilotToggle = millis();
         //toggleSafeMode();
         //return
     }
@@ -69,6 +72,34 @@ void manualControl()
         {
             driveMotors(-1, getPercentSpeed(dataFromTransmitter[1])); //reverse
         }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Instruction Filter function                                                                         //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+void driveMotors(int direction, int percentSpeed)
+{
+    // Basic Drive functions
+    switch (direction)
+    {
+    case 0: // Stop
+        stopDrive(0);
+        break;
+    case 1: // Forward
+        forwardDrive(((float)percentSpeed / 100) * maxSpeed);
+        break;
+    case -1: // Reverse
+        reverseDrive(((float)percentSpeed / 100) * maxSpeed);
+        break;
+    case 2: // Left
+        leftDrive(((float)percentSpeed / 100) * maxSpeed);
+        break;
+    case 3: // Right
+        rightDrive(((float)percentSpeed / 100) * maxSpeed);
+        break;
+    default:
+        break;
     }
 }
 
